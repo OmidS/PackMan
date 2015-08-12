@@ -1,4 +1,4 @@
-function DepMatUpdate(repoList)
+function DepMatUpdate(repoList, varargin)
     % DepMatUpdate. Clones or updates all repositories in a DepMatRepo list 
     %
     %
@@ -14,11 +14,23 @@ function DepMatUpdate(repoList)
         return;
     end
     
-    allSourceDir = fullfile(getUserDirectory, 'depmat', 'Source');
+    forcePathUpdate = nargin > 1 && strcmp(varargin{1}, 'force');
     
-    for repo = repoList
-        DepMatCloneOrUpdate(allSourceDir, repo);
+    rootSourceDir = fullfile(getUserDirectory, 'depmat', 'Source');
+    repoDirList = cell(1, numel(repoList));
+    repoNameList = cell(1, numel(repoList));
+    
+    for repoIndex = 1 : numel(repoList)
+        repo = repoList(repoIndex);
+        repoCombinedName = [repo.Name '_' repo.Branch];
+        repoSourceDir = fullfile(rootSourceDir, repoCombinedName);
+        [~, changed] = DepMatCloneOrUpdate(repoSourceDir, repo);
+        forcePathUpdate = forcePathUpdate || changed;
+        repoDirList{repoIndex} = repoSourceDir;
+        repoNameList{repoIndex} = repoCombinedName;
     end
+    
+    DepMatAddPaths(repoDirList, repoNameList, forcePathUpdate);
 end
 
 function success = init

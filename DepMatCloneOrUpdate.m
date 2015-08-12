@@ -1,4 +1,4 @@
-function success = DepMatCloneOrUpdate(allSourceDir, repoDef)
+function [success, changed] = DepMatCloneOrUpdate(sourceDir, repoDef)
     % DepMatCloneOrUpdate. Performs a clone or update of a git repository
     %
     %
@@ -9,8 +9,6 @@ function success = DepMatCloneOrUpdate(allSourceDir, repoDef)
     %     Author: Tom Doel, 2015.  www.tomdoel.com
     %     Distributed under the MIT licence. Please see website for details.
     %
-    
-    sourceDir = fullfile(allSourceDir, [repoDef.Name '_' repoDef.Branch]);
     
     if ~(exist(sourceDir, 'dir') == 7)
         mkdir(sourceDir);
@@ -26,9 +24,10 @@ function success = DepMatCloneOrUpdate(allSourceDir, repoDef)
         fetch_failure_filename = fullfile(sourceDir, 'depmat_fetch_failure');
         fetch_failure = 2 == exist(fetch_failure_filename, 'file');
         if 7 == exist(fullfile(sourceDir, '.git'), 'dir') && ~fetch_failure
-            success = updateGitRepo(repoDef);
+            [success, changed] = updateGitRepo(repoDef);
         else
             success = cloneGitRepo(repoDef, fetch_failure);
+            changed = true;
         end
         
         if fetch_failure
@@ -39,6 +38,7 @@ function success = DepMatCloneOrUpdate(allSourceDir, repoDef)
     catch ex
         cd(lastDir);
         success = false;
+        changed = false;
     end
 end
 
@@ -59,7 +59,7 @@ function success = cloneGitRepo(repoDef, skipInit)
         end
     end
     
-    if ~execute(['git fetch'])
+    if ~execute('git fetch')
         fileHandle = fopen('depmat_fetch_failure', 'w');
         fclose(fileHandle);
 
@@ -78,7 +78,9 @@ function success = cloneGitRepo(repoDef, skipInit)
     success = true;
 end
 
-function success = updateGitRepo(repoDef)
+function [success, changed] = updateGitRepo(repoDef)
+    changed = false;
+    
     [success, local_id] = execute('git rev-parse @{0}');
     if ~success
         disp(['! ' repoDef.Name ' unable to check for updates']);
@@ -110,6 +112,7 @@ function success = updateGitRepo(repoDef)
             return;
         else
             success = true;
+            changed = true;
             disp([repoDef.Name ' updated']);
             return;
         end
