@@ -18,6 +18,12 @@ function DepMatAddPaths(baseFolderList, repoNameList, forceUpdate)
     end
 
     allPathsToAdd = {};
+
+    full_path = mfilename('fullpath');
+    [path_root, ~, ~] = fileparts(full_path);
+    myPaths = getSubfolders(path_root);
+    allPathsToAdd = [allPathsToAdd, myPaths];
+    
     for repoIndex = 1 : numel(baseFolderList)
         repoName = repoNameList{repoIndex};
         doAddPaths = forceUpdate;
@@ -31,8 +37,14 @@ function DepMatAddPaths(baseFolderList, repoNameList, forceUpdate)
         end
         
     end
+    filtered_paths = {};
+    for nextPath = allPathsToAdd
+        if isempty(strfind(nextPath{1}, [filesep '+'])) && isempty(strfind(nextPath{1}, [filesep '@']))
+            filtered_paths{end + 1} = nextPath{1};
+        end
+    end
     
-    AddToPath(allPathsToAdd);
+    AddToPath(filtered_paths);
 end
 
 function subFolders = getSubfolders(baseFolder)
@@ -41,7 +53,7 @@ end
 
 function AddToPath(pathList)    
     % Add all the paths together (much faster than adding them individually)
-    if ~isempty(pathList) 
+    if ~isempty(pathList)
         addpath(pathList{:});
     end
 end
