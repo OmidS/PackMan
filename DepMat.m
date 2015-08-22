@@ -27,13 +27,13 @@ classdef DepMat
             
             obj.RepoDirList = cell(1, numel(obj.RepoList));
             obj.RepoNameList = cell(1, numel(obj.RepoList));
-            obj.RepoUpdaterList = DepMatRepositoryUpdater.empty(size(obj.RepoList));
+            obj.RepoUpdaterList = DepMatRepositoryUpdater.empty;
             
             for repoIndex = 1 : numel(obj.RepoList)
                 repo = obj.RepoList(repoIndex);
                 repoCombinedName = repo.FolderName;
                 repoSourceDir = fullfile(obj.RootSourceDir, repoCombinedName);
-                repo = DepMatRepositoryUpdater(sourceDir, repoDef);
+                repo = DepMatRepositoryUpdater(repoSourceDir, repo);
                 obj.RepoUpdaterList(repoIndex) = repo;
                 obj.RepoDirList{repoIndex} = repoSourceDir;
                 obj.RepoNameList{repoIndex} = repoCombinedName;
