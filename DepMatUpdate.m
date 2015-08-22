@@ -10,50 +10,22 @@ function DepMatUpdate(repoList, varargin)
     %     Distributed under the MIT licence. Please see website for details.
     %
    
-    if ~init
-        return;
-    end
     
     forcePathUpdate = nargin > 1 && strcmp(varargin{1}, 'force');
     
     rootSourceDir = fullfile(getUserDirectory, 'depmat', 'Source');
-    repoDirList = cell(1, numel(repoList));
-    repoNameList = cell(1, numel(repoList));
     
-    for repoIndex = 1 : numel(repoList)
-        repo = repoList(repoIndex);
-        repoCombinedName = [repo.Name '_' repo.Branch];
-        repoSourceDir = fullfile(rootSourceDir, repoCombinedName);
-        [~, changed] = DepMatCloneOrUpdate(repoSourceDir, repo);
-        forcePathUpdate = forcePathUpdate || changed;
-        repoDirList{repoIndex} = repoSourceDir;
-        repoNameList{repoIndex} = repoCombinedName;
-    end
-    
-    DepMatAddPaths(repoDirList, repoNameList, forcePathUpdate);
-end
-
-function success = init
-    if ~isGitInstalled
-        success = false;
+    depMat = DepMat(repoList, rootSourceDir);
+    if ~depMat.isGitInstalled
         msgbox('Cannot find git');
         return;
     end
     
-    fixCurlPath;
-    success = true;
-   
-end
-
-function installed = isGitInstalled
-    installed = ~isempty(execute('which git'));
-end
-
-function output = execute(command)
-    [return_value, output] = system(command);
-    if (return_value ~= 0)
-        output = [];
-    end
+    [anyChanged, repoDirList, repoNameList] = depMat.cloneOrUpdateAll;
+    
+    forcePathUpdate = forcePathUpdate || anyChanged;
+    
+    DepMatAddPaths(repoDirList, repoNameList, forcePathUpdate);
 end
 
 function home_directory = getUserDirectory
@@ -65,13 +37,4 @@ function home_directory = getUserDirectory
     end
 end
 
-function fixCurlPath
-    % Matlab's curl configuration doesn't include https so git will not work.
-    % We need to add the system curl configuration directory earlier in the
-    % path so that it picks up this one instead of Matlab's
-    currentLibPath = getenv('DYLD_LIBRARY_PATH');
-    binDir = '/usr/lib';
-    if (7 == exist(binDir, 'dir')) && ~strcmp(currentLibPath(1:length(binDir) + 1), [binDir ':'])
-        setenv('DYLD_LIBRARY_PATH', [binDir ':' currentLibPath]);
-    end
-end
+

@@ -100,7 +100,7 @@ classdef DepMatRepository < handle
                 case {DepMatStatus.DirectoryNotFound, ...
                         DepMatStatus.NotUnderSourceControl, ...
                         DepMatStatus.FetchFailure}
-                    success = obj.cloneRepo(fetch_failure);
+                    success = obj.cloneRepo;
                     if success
                         disp([obj.RepoDef.Name ' added']);
                         changed = true;
@@ -152,7 +152,7 @@ classdef DepMatRepository < handle
                 return;
             end
             
-            if ~DepMatRepository.isGitInstalled
+            if ~DepMat.isGitInstalled
                 status = DepMatStatus.GitNotFound;
                 return;
             end
@@ -162,17 +162,17 @@ classdef DepMatRepository < handle
                 return;
             end
             
-            [success, local_id] = DepMatRepository.execute('git rev-parse @{0}');
+            [success, local_id] = DepMat.execute('git rev-parse @{0}');
             if ~success
                 status = DepMatStatus.GitFailure;
                 return;
             end
-            [success, remote_id] = DepMatRepository.execute('git rev-parse @{u}');
+            [success, remote_id] = DepMat.execute('git rev-parse @{u}');
             if ~success
                 status = DepMatStatus.GitFailure;
                 return;
             end
-            [success, base] = DepMatRepository.execute('git merge-base @{0} @{u}');
+            [success, base] = DepMat.execute('git merge-base @{0} @{u}');
             if ~success
                 status = DepMatStatus.GitFailure;
                 return;
@@ -190,7 +190,7 @@ classdef DepMatRepository < handle
         end
         
         function success = internalUpdateRepo(obj)
-            pullResult = DepMatRepository.execute('git pull');
+            pullResult = DepMat.execute('git pull');
             success = ~isempty(pullResult);
         end
         
@@ -199,34 +199,29 @@ classdef DepMatRepository < handle
             % Avoid initialisation if it has already been done, to avoid errors
             fetchFailure = obj.checkForFetchFailure;
             if ~fetchFailure
-                if ~DepMatRepository.execute('git init')
+                if ~DepMat.execute('git init')
                     success = false;
-                    disp(['! ' obj.RepoDef.Name ' could not be cloned']);
                     return;
                 end
                 
-                if ~DepMatRepository.execute(['git remote add -t ' obj.RepoDef.Branch ' origin ' obj.RepoDef.Url])
+                if ~DepMat.execute(['git remote add -t ' obj.RepoDef.Branch ' origin ' obj.RepoDef.Url])
                     success = false;
-                    disp(['! ' obj.RepoDef.Name ' could not be cloned']);
                     return;
                 end
             end
             
-            if ~DepMatRepository.execute('git fetch')
+            if ~DepMat.execute('git fetch')
                 obj.setFetchFailure;
                 
                 success = false;
-                disp(['! ' obj.RepoDef.Name ' could not be cloned']);
                 return;
             end
             
-            if ~DepMatRepository.execute(['git checkout ' obj.RepoDef.Branch])
+            if ~DepMat.execute(['git checkout ' obj.RepoDef.Branch])
                 success = false;
-                disp(['! ' obj.RepoDef.Name ' could not be cloned']);
                 return;
             end
             
-            disp([obj.RepoDef.Name ' added' ]);
             success = true;
             if fetchFailure
                 obj.clearFetchFailure
@@ -248,24 +243,6 @@ classdef DepMatRepository < handle
         function clearFetchFailure(obj)
             fetchFailureFilename = fullfile(obj.SourceDir, obj.FetchFailureFileName);
             delete(fetchFailureFilename);
-        end
-        
-    end
-    
-    
-    methods (Static)
-        function [success, output] = execute(command)
-            [return_value, output] = system(command);
-            success = return_value == 0;
-            if ~success
-                if strfind(output, 'Protocol https not supported or disabled in libcurl')
-                    disp('! You need to modify the the DYLD_LIBRARY_PATH environment variable to point to a newer version of libcurl. The version installed with Matlab does not support using https with git.');
-                end
-            end
-        end
-
-        function installed = isGitInstalled
-            installed = ~isempty(execute('which git'));
         end
         
     end
