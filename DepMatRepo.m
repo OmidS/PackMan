@@ -14,14 +14,16 @@ classdef DepMatRepo
         Name
         Url
         Branch
+        FolderName
     end
     
     methods
-        function obj = DepMatRepo(name, branch, url)
+        function obj = DepMatRepo(name, branch, url, folderName)
             if nargin > 0
                 obj.Name = name;
                 obj.Branch = branch;
                 obj.Url = url;
+                obj.FolderName = folderName;
             end
         end
     end

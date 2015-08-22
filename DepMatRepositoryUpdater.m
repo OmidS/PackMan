@@ -1,5 +1,5 @@
-classdef DepMatRepository < handle
-    % DepMatRepository. Query, clone and update a git repository
+classdef DepMatRepositoryUpdater < handle
+    % DepMatRepositoryUpdater. Query, clone and update a git repository
     %
     %
     %
@@ -20,8 +20,8 @@ classdef DepMatRepository < handle
     end
     
     methods
-        function obj = DepMatRepository(sourceDir, repoDef)
-            % Creates a DepMatRepository object for checking the status of
+        function obj = DepMatRepositoryUpdater(sourceDir, repoDef)
+            % Creates a DepMatRepositoryUpdater object for checking the status of
             % and updating a git repository
  
             obj.SourceDir = sourceDir;

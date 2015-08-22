@@ -10,6 +10,6 @@ function [success, changed] = DepMatCloneOrUpdate(sourceDir, repoDef)
     %     Distributed under the MIT licence. Please see website for details.
     %
     
-    repo = DepMatRepository(sourceDir, repoDef);
+    repo = DepMatRepositoryUpdater(sourceDir, repoDef);
     [success, changed] = repo.cloneOrUpdate;
 end

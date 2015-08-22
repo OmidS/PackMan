@@ -30,7 +30,7 @@ classdef DepMat
             
             for repoIndex = 1 : numel(obj.RepoList)
                 repo = obj.RepoList(repoIndex);
-                repoCombinedName = [repo.Name '_' repo.Branch];
+                repoCombinedName = repo.FolderName;
                 repoSourceDir = fullfile(obj.RootSourceDir, repoCombinedName);
                 [~, changed] = DepMatCloneOrUpdate(repoSourceDir, repo);
                 anyChanged = anyChanged || changed;
