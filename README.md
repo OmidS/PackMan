@@ -23,10 +23,10 @@ You can substitute in your own function `MyRepoList`:
 function repos = MyRepoList
     
     repos = DepMatRepo.empty;
-    repos(end + 1) = DepMatRepo('apple', 'master', 'https://github.com/yourdomain/apple.git');
-    repos(end + 1) = DepMatRepo('banana', 'master', 'https://github.com/yourdomain/banana.git');
-    repos(end + 1) = DepMatRepo('orange', 'specialbranch', 'https://github.com/yourdomain/orange.git');
+    repos(end + 1) = DepMatRepo('apple', 'master', 'https://github.com/yourdomain/apple.git', 'apple_master');
+    repos(end + 1) = DepMatRepo('banana', 'master', 'https://github.com/yourdomain/banana.git', 'banana_master');
+    repos(end + 1) = DepMatRepo('orange', 'specialbranch', 'https://github.com/yourdomain/orange.git', 'orange_specialbranch');
 end
 ```
 
-This will the check out and keep up to date the repository `apple` with URL `https://github.com/yourdomain/apple.git` on branch `master`, and so on.
+This will the check out and keep up to date the repository `apple` with URL `https://github.com/yourdomain/apple.git` on branch `master`, in a directory called 'apple_master' and so on.
