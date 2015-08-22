@@ -40,6 +40,22 @@ classdef DepMat
             end
         end
         
+        function statusList = getAllStatus(obj)
+            statusList = DepMatStatus.empty;
+            for repoIndex = 1 : numel(obj.RepoList)
+                repo = obj.RepoUpdaterList(repoIndex);
+                statusList(repoIndex) = repo.getStatus;
+            end
+        end
+        
+        function success = updateAll(obj)
+            success = true;
+            for repoIndex = 1 : numel(obj.RepoList)
+                repo = obj.RepoUpdaterList(repoIndex);
+                success = success && repo.updateRepo;
+            end
+        end
+        
         function anyChanged = cloneOrUpdateAll(obj)
             anyChanged = false;
             
