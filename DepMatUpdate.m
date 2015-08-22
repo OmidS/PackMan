@@ -21,7 +21,9 @@ function DepMatUpdate(repoList, varargin)
         return;
     end
     
-    [anyChanged, repoDirList, repoNameList] = depMat.cloneOrUpdateAll;
+    anyChanged = depMat.cloneOrUpdateAll;
+    repoDirList = depMat.RepoDirList;
+    repoNameList = depMat.RepoNameList;
     
     forcePathUpdate = forcePathUpdate || anyChanged;
     

@@ -14,6 +14,9 @@ classdef DepMat
     properties (SetAccess = private)
         RepoList
         RootSourceDir
+        RepoUpdaterList
+        RepoDirList
+        RepoNameList
     end
     
     methods
@@ -21,21 +24,29 @@ classdef DepMat
             obj.RepoList = repoList;
             obj.RootSourceDir = rootSourceDir;
             DepMat.fixCurlPath;
-        end
-        
-        function [anyChanged, repoDirList, repoNameList] = cloneOrUpdateAll(obj)
-            anyChanged = false;
-            repoDirList = cell(1, numel(obj.RepoList));
-            repoNameList = cell(1, numel(obj.RepoList));
+            
+            obj.RepoDirList = cell(1, numel(obj.RepoList));
+            obj.RepoNameList = cell(1, numel(obj.RepoList));
+            obj.RepoUpdaterList = DepMatRepositoryUpdater.empty(size(obj.RepoList));
             
             for repoIndex = 1 : numel(obj.RepoList)
                 repo = obj.RepoList(repoIndex);
                 repoCombinedName = repo.FolderName;
                 repoSourceDir = fullfile(obj.RootSourceDir, repoCombinedName);
-                [~, changed] = DepMatCloneOrUpdate(repoSourceDir, repo);
+                repo = DepMatRepositoryUpdater(sourceDir, repoDef);
+                obj.RepoUpdaterList(repoIndex) = repo;
+                obj.RepoDirList{repoIndex} = repoSourceDir;
+                obj.RepoNameList{repoIndex} = repoCombinedName;
+            end
+        end
+        
+        function anyChanged = cloneOrUpdateAll(obj)
+            anyChanged = false;
+            
+            for repoIndex = 1 : numel(obj.RepoList)
+                repo = obj.RepoUpdaterList(repoIndex);
+                [~, changed] = repo.cloneOrUpdate;
                 anyChanged = anyChanged || changed;
-                repoDirList{repoIndex} = repoSourceDir;
-                repoNameList{repoIndex} = repoCombinedName;
             end
 
         end
