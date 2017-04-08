@@ -15,6 +15,7 @@ classdef DepMatStatus
         DirectoryNotFound
         NotUnderSourceControl
         FetchFailure
+        UpToDateButWrongHead
         UpToDate
         UpdateAvailable
         LocalChanges

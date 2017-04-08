@@ -15,16 +15,32 @@ classdef DepMatRepo
         Url
         Branch
         FolderName
+        Commit
+        GetLatest
     end
     
     methods
-        function obj = DepMatRepo(name, branch, url, folderName)
+        function obj = DepMatRepo(name, branch, url, folderName, commit, getLatest)
             if nargin > 0
                 obj.Name = name;
                 obj.Branch = branch;
                 obj.Url = url;
                 obj.FolderName = folderName;
+                if nargin < 5, commit = ''; end
+                obj.Commit = commit;
+                if nargin < 6, getLatest = true; end
+                obj.GetLatest = getLatest;
             end
+        end
+        function strct = toStruct(obj)
+            strct = struct( ...
+                'Name', obj.Name, ...
+                'Branch', obj.Branch, ...
+                'Url', obj.Url, ...
+                'FolderName', obj.FolderName, ...
+                'Commit', obj.Commit, ...
+                'GetLatest', obj.GetLatest ...
+            );
         end
     end
     

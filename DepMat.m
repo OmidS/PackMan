@@ -40,12 +40,14 @@ classdef DepMat
             end
         end
         
-        function statusList = getAllStatus(obj)
+        function [statusList, varargout] = getAllStatus(obj)
             statusList = DepMatStatus.empty;
+            local_commit_ids = cell(size(obj.RepoList));
             for repoIndex = 1 : numel(obj.RepoList)
                 repo = obj.RepoUpdaterList(repoIndex);
-                statusList(repoIndex) = repo.getStatus;
+                [statusList(repoIndex), local_commit_ids{repoIndex}] = repo.getStatus;
             end
+            if nargout > 1, varargout{1} = local_commit_ids; end
         end
         
         function success = updateAll(obj)
