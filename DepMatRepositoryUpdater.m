@@ -42,6 +42,7 @@ classdef DepMatRepositoryUpdater < handle
             try
                 cd(obj.SourceDir);
                 [status, varargout{1}] = obj.internalGetStatus;
+                if isempty(varargout{1}), [~, varargout{1}] = obj.internalGetHeadHash(); end
                 cd(lastDir);
             catch ex
                 cd(lastDir);
@@ -239,6 +240,16 @@ classdef DepMatRepositoryUpdater < handle
             end
         end
         
+        function [status, commitHash] = internalGetHeadHash(obj)
+            status = true;
+            [success, commitHash] = DepMat.execute('git rev-parse HEAD');
+            if ~success
+                status = DepMatStatus.GitFailure;
+                return;
+            end
+            commitHash = strrep(commitHash,sprintf('\n'),''); 
+        end
+        
         function success = internalUpdateRepo(obj)
             pullResult = DepMat.execute('git pull');
             success = ~isempty(pullResult);
@@ -267,7 +278,13 @@ classdef DepMatRepositoryUpdater < handle
                 return;
             end
             
-            if ~DepMat.execute(['git checkout ' obj.RepoDef.Branch])
+            if ~isempty(obj.RepoDef.Commit)&&~obj.RepoDef.GetLatest
+                checkoutCmd = ['git checkout ' obj.RepoDef.Commit];
+            else
+                checkoutCmd = ['git checkout ' obj.RepoDef.Branch];
+            end
+            
+            if ~DepMat.execute(checkoutCmd)
                 success = false;
                 return;
             end

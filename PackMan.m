@@ -81,7 +81,7 @@ classdef PackMan
             [allStatus, allCommitIDs] = depMat.getAllStatus;
 
             for i = 1:length(depMat.RepoList)
-                if isequal(allStatus(i), DepMatStatus.UpToDate)
+                if ( isequal(allStatus(i), DepMatStatus.UpToDate) || ~isempty(allCommitIDs{i}) )
                     fieldName = depMat.RepoList(i).Name;
                     dependencies.(fieldName) = depMat.RepoList(i).toStruct();
                     dependencies.(fieldName).Commit = allCommitIDs{i};
