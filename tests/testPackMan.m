@@ -1,4 +1,6 @@
 %testPackMan Tests the PackMan class
+% To run the tests:
+% 	runtests('testPackMan');
 
 %% Main function to generate tests
 function tests = testPackMan
@@ -9,6 +11,7 @@ end
 function testThatPackManConstructorWorks(testCase)
     % Test specific code
     pm = PackMan();
+    pm.install();
     verifyEqual(testCase,class(pm),'PackMan');
 end
 
@@ -16,6 +19,7 @@ function testThatPackManRelativePathsWork(testCase)
     % Test specific code
     wDir = pwd;
     pm = PackMan();
+    pm.install();
     
     expectedDepDirPath = fullfile(wDir, './external');
     verifyEqual(testCase,pm.depDirPath, expectedDepDirPath);
@@ -27,6 +31,8 @@ end
 function testThatPackManGeneratesPackageFile(testCase)
     % Test specific code
     pm = PackMan();
+    pm.install();
+    
     verifyTrue(testCase, exist(pm.packageFilePath, 'file')~=false );
 end
 
@@ -34,6 +40,8 @@ function testThatPackManFetchesRepos(testCase)
     % Test specific code
     depList        = DepMatRepo('DepMat', 'master', 'https://github.com/OmidS/depmat.git', 'depmat', '', true);
     pm = PackMan( depList );
+    pm.install();
+    
     depDir = fullfile(pm.depDirPath, depList.FolderName);
     verifyTrue(testCase, exist(depDir, 'dir')~=false );
     
@@ -46,12 +54,14 @@ function testThatPackManFetchesRepos(testCase)
     end
 end
 
-function testThatPackManCanFetcheSpecificCommits(testCase)
+function testThatPackManCanFetchesSpecificCommits(testCase)
     % Test specific code
     depList           = DepMatRepo('DepMat1', 'master', 'https://github.com/OmidS/depmat.git', 'depmat1', 'f3810b050186a2e1e5e3fbdb64dd7cd8f3bc8528', false);
     depList(end+1, 1) = DepMatRepo('DepMat2', 'master', 'https://github.com/OmidS/depmat.git', 'depmat2', '95fe15dc04406846857e1601f5954a1b4997313b', false);
     
     pm = PackMan( depList );
+    pm.install();
+    
     depDir1 = fullfile(pm.depDirPath, depList(1).FolderName);
     depDir2 = fullfile(pm.depDirPath, depList(2).FolderName);
     addedFile = 'TestRepoList.m'; % This is a file we expect to exist in commit 2 but not in commit 1
@@ -67,6 +77,26 @@ function testThatPackManCanFetcheSpecificCommits(testCase)
     end
 end
 
+function testThatPackManAutoInstallsOnlyWhenItHasNoOutput(testCase)
+    % Test specific code
+    depList           = DepMatRepo('DepMat1', 'master', 'https://github.com/OmidS/depmat.git', 'depmat1', '', false);
+    
+    packageDir = fullfile('./external', depList(1).FolderName); 
+    verifyTrue(testCase, exist( packageDir , 'dir')==false );
+    
+    pm = PackMan( depList );
+    verifyTrue(testCase, exist( packageDir , 'dir')==false );
+    
+    pm.install();
+    verifyTrue(testCase, exist( packageDir , 'dir')~=false );
+    
+    depList(end+1, 1) = DepMatRepo('DepMat2', 'master', 'https://github.com/OmidS/depmat.git', 'depmat2', '', false);
+    packageDir = fullfile('./external', depList(2).FolderName); 
+    verifyTrue(testCase, exist( packageDir , 'dir')==false );
+    PackMan( depList );
+    verifyTrue(testCase, exist( packageDir , 'dir')~=false );
+end
+
 function testThatPackManRejectsInvalidDepLists(testCase)
     % Test specific code
     depList           = DepMatRepo('DepMat', 'master', 'https://github.com/OmidS/depmat.git', 'depmat1', 'f3810b050186a2e1e5e3fbdb64dd7cd8f3bc8528', false);
@@ -74,6 +104,33 @@ function testThatPackManRejectsInvalidDepLists(testCase)
     verifyError(testCase, @()( PackMan(depList) ), 'PackMan:DepListError' );
 end
 
+function testThatPackManReturnsDepPaths(testCase)
+    % Test specific code
+    depList        = DepMatRepo('DepMat', 'master', 'https://github.com/OmidS/depmat.git', 'depmat', '', true);
+    pm = PackMan( depList );
+    pm.install();
+    paths = pm.genPath();
+    expectedPaths = [fullfile(pm.parentDir, './external/depmat/tests'),';', ...
+                     fullfile(pm.parentDir, './external/depmat'),';', ...
+                     pm.parentDir,';'];
+    verifyEqual(testCase, paths, expectedPaths);
+end
+
+function testThatPackManRecursiveWorks(testCase)
+    % Test specific code
+    depList        = DepMatRepo('matlabPackManRecursiveSample', 'master', 'https://github.com/OmidS/matlabPackManRecursiveSample.git', 'matlabPackManRecursiveSample', '', true);
+    pm = PackMan( depList );
+    pm.install();
+    paths = pm.genPath();
+    expectedPaths = [fullfile(pm.parentDir, './external/matlabPackManRecursiveSample/external/depmat/tests'),';', ...
+                     fullfile(pm.parentDir, './external/matlabPackManRecursiveSample/external/depmat'),';', ...
+                     fullfile(pm.parentDir, './external/matlabPackManRecursiveSample/external/matlabPackManSample/external/depmat/tests'),';', ...
+                     fullfile(pm.parentDir, './external/matlabPackManRecursiveSample/external/matlabPackManSample/external/depmat'),';', ...
+                     fullfile(pm.parentDir, './external/matlabPackManRecursiveSample/external/matlabPackManSample'),';', ...
+                     fullfile(pm.parentDir, './external/matlabPackManRecursiveSample'),';', ...
+                     pm.parentDir,';'];
+    verifyEqual(testCase, paths, expectedPaths);
+end
 
 %% Helper functions
 function [depDir, packageFile] = getPaths()

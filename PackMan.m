@@ -1,4 +1,4 @@
-classdef PackMan
+classdef PackMan < handle & matlab.mixin.Copyable
     %PackMan Package manager class
     %   Uses DepMat tp provide dependency management
     
@@ -10,7 +10,7 @@ classdef PackMan
     end
     
     methods
-        function obj = PackMan( depList, depDirPath, packageFilePath )
+        function obj = PackMan( depList, depDirPath, packageFilePath, parDir )
             % Inputs:
             % (1) depList (default): a structure or DepMat array of the
             %             dependencies.
@@ -18,12 +18,16 @@ classdef PackMan
             %             directory to install dependencies
             % (3) packageFilePath (default: './package.mat'): path to package
             %             info file
+            % (4) parDir (default: pwd): path to main directory of the
+            %             package. By default, will be the current
+            %             directory when calling PackMan
             % Outputs:
             % (1) PackMan object
             % Usage sample:
             % 
             
-            obj.parentDir = pwd;
+            if nargin < 4 || isempty(parDir), parDir = pwd; end
+            obj.parentDir = parDir;
             
             if nargin < 1 || isempty(depList), depList = DepMat.empty; end
             if nargin < 2 || isempty(depDirPath), depDirPath = fullfile(obj.parentDir, '/external'); end
@@ -36,21 +40,21 @@ classdef PackMan
             obj.depDirPath = depDirPath;
             obj.packageFilePath = packageFilePath;
             
-            obj.install();
-            obj.saveToFile();
+            obj.addPackageFileDeps();
+            if nargout < 1
+                obj.install();
+            end
         end
         
-        function install(obj)
-            % Installs dependecies in the dep directory
+        function obj = addPackageFileDeps( obj )
+            % Incorporates dependecies from the package file
             % Inputs: 
             % (none)
             % Outputs
             % (none)
             % Usage sample: 
             %   pm = PackMan();
-            %   obj.install();
             
-            % If you want to load dependecies from package.mat, uncomment the follwing
             depListF = PackMan.loadFromPackageFile(obj.packageFilePath);
             
             [depListOk, message] = PackMan.isDepListValid(depListF);
@@ -61,10 +65,78 @@ classdef PackMan
                 fprintf('Discarding package file info!\n'); 
             end
             
-            % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-            % Install/update dependencies
+        end
+        
+        function install(obj)
+            % Installs/update dependecies in the dep directory
+            % Inputs: 
+            % (none)
+            % Outputs
+            % (none)
+            % Usage sample: 
+            %   pm = PackMan();
+            %   obj.install();
+            
+            fprintf('Installing dependencies for %s...\n', obj.parentDir);
+                
             depMat = DepMat(obj.depList, obj.depDirPath);
             depMat.cloneOrUpdateAll;
+            
+            obj.saveToFile();
+            obj.recurse();
+        end
+        
+        function recurse( obj )
+            % Goes over the list of dependecies and installs their
+            % dependencies
+            % Inputs: 
+            % (none)
+            % Outputs
+            % (none)
+            % Usage sample: 
+            %   pm = PackMan();
+            %   obj.recurse();
+            
+            for di = 1:length( obj.depList )
+                pm = obj.createDepPackMan( obj.depList(di) );
+                pm.install();
+            end
+        end
+        
+        function paths = genPath( obj )
+            % Generates a string of dependency directories
+            % Inputs: 
+            % -(none)
+            % Outputs: 
+            % -(1) paths: string of dependencies and recursively of their
+            %           dependencies
+            % Usage sample: 
+            %   pm = PackMan(); 
+            %   pm.install(); 
+            %   paths = pm.genPath(); 
+            %   addpath(paths); 
+            
+            paths = '';
+            for di = 1:length( obj.depList )
+                pm = obj.createDepPackMan( obj.depList(di) );
+                depPaths = pm.genPath();
+                paths = [paths, depPaths];
+            end
+            % Add subpaths of this package
+            files = dir(obj.parentDir);
+            files(~[files.isdir]) = [];
+            files(ismember({files.name}, {'.','..','.git',obj.depDirPath})) = [];
+            for fi = 1:length(files)
+                subDirPath = fullfile(files(fi).folder, files(fi).name);
+                if strcmp(subDirPath, obj.depDirPath), continue; end
+                paths = [paths, genpath(subDirPath)];
+            end
+            paths = [paths, obj.parentDir, ';'];
+        end
+        
+        function pm = createDepPackMan( obj, dep )
+            depDir = fullfile(obj.depDirPath, dep.FolderName);
+            pm = PackMan([], '', '', depDir);
         end
         
         function saveToFile(obj)
