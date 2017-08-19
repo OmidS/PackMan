@@ -68,16 +68,18 @@ function installDepMat( depDirPath )
 % Usage example:
 % installDepMat( depDirPath );
 
-depMatDir = fullfile(depDirPath, 'depmat');
+packManDir = fullfile(depDirPath, 'PackMan');
 try
     repoUrl = 'https://github.com/OmidS/PackMan.git';
-    command = ['git clone ', repoUrl, ' "',depMatDir,'"'];
+    command = ['git clone ', repoUrl, ' "',packManDir,'"'];
     [status, cmdout] = system(command);
     if (~status), fprintf('%s', cmdout); end
 catch ME
     
 end
 
-addpath(depMatDir);
+packManSourceDir = fullfile(packManDir,'source');
+
+addpath(genpath(packManSourceDir));
 
 end
