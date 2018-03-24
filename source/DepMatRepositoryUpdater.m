@@ -104,7 +104,7 @@ classdef DepMatRepositoryUpdater < handle
                         DepMatStatus.FetchFailure}
                     success = obj.cloneRepo;
                     if success
-                        disp([obj.RepoDef.Name ' added']);
+                        fprintf('%s added (commit: %s...)\n', obj.RepoDef.Name, obj.RepoDef.Commit(1:min(4, length(obj.RepoDef.Commit))));
                         changed = true;
                     else
                         disp(['! ' obj.RepoDef.Name ' could not be added']);
@@ -112,7 +112,7 @@ classdef DepMatRepositoryUpdater < handle
                     
                 case DepMatStatus.UpToDate
                     success = true;
-                    disp([obj.RepoDef.Name ' up to date']);
+                    fprintf('%s up to date (commit: %s...)\n', obj.RepoDef.Name, obj.RepoDef.Commit(1:min(4, length(obj.RepoDef.Commit))));
                     
                 case DepMatStatus.UpToDateButWrongHead
                     disp([obj.RepoDef.Name ' up to date but at wrong head']);
@@ -127,7 +127,7 @@ classdef DepMatRepositoryUpdater < handle
                 case DepMatStatus.UpdateAvailable
                     success = obj.updateRepo;
                     if success
-                        disp([obj.RepoDef.Name ' updated']);
+                        fprintf('%s updated (commit: %s...)\n', obj.RepoDef.Name, obj.RepoDef.Commit(1:min(4, length(obj.RepoDef.Commit))));
                         changed = true;
                     else
                         disp(['! ' obj.RepoDef.Name ' could not be updated']);
