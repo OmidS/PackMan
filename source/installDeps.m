@@ -26,7 +26,7 @@ if nargin < 2 || isempty(depSubDir)
     depSubDir = fullfile('.', 'external');
     depSubDir = getDepDirPath( depSubDir );
 end
-installDepMat( depSubDir );
+installPackMan( depSubDir );
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Get the list of dependencies
@@ -58,7 +58,7 @@ depDirPath = fullfile(thisFileDir, depSubDir);
 
 end
 
-function installDepMat( depDirPath )
+function installPackMan( depDirPath )
 % Makes sure DepMat is available and in the path, so that PackMan can
 % install other dependencies
 % Inputs: 
@@ -66,7 +66,7 @@ function installDepMat( depDirPath )
 % Outputs: 
 % (none)
 % Usage example:
-% installDepMat( depDirPath );
+% installPackMan( depDirPath );
 
 packManDir = fullfile(depDirPath, 'PackMan');
 try
