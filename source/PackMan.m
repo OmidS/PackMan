@@ -3,7 +3,7 @@ classdef PackMan < handle & matlab.mixin.Copyable
     %   Uses DepMat tp provide dependency management
     
     properties
-        depList % List of dependencies
+        depList          % List of dependencies
         parentDir        % Path to main directory of the package
         depDirPath       % Path to subdirectory for dependencies
         packageFilePath  % Path to package info file
@@ -67,39 +67,57 @@ classdef PackMan < handle & matlab.mixin.Copyable
             
         end
         
-        function install(obj)
+        function install(obj, alreadyInstalled)
             % Installs/update dependecies in the dep directory
             % Inputs: 
-            % (none)
+            % (1) alreadyInstalled (default: []): a list of dependecies
+            %       that are already installed (perhaps by other
+            %       dependecies and thus do not need to be installed.
             % Outputs
             % (none)
             % Usage sample: 
             %   pm = PackMan();
             %   obj.install();
             
+            if isempty(obj.depList), return; end
+            
+            if nargin < 2, alreadyInstalled = []; end
+            
             fprintf('Installing dependencies for %s...\n', obj.parentDir);
-                
-            depMat = DepMat(obj.depList, obj.depDirPath);
-            depMat.cloneOrUpdateAll;
+            
+            for i = 1:length(obj.depList)
+                thisDep = obj.depList(i);
+                if ismember(thisDep, alreadyInstalled)
+                    fprintf('%s already installed (commit: %s...)\n', thisDep.Name, thisDep.Commit(1:min(4,length(thisDep.Commit))));
+                else
+                    depMat = DepMat(thisDep, obj.depDirPath);
+                    depMat.cloneOrUpdateAll;
+                    alreadyInstalled = cat(1, alreadyInstalled, thisDep);
+                end
+            end
             
             obj.saveToFile();
-            obj.recurse();
+            obj.recurse( alreadyInstalled );
         end
         
-        function recurse( obj )
+        function recurse( obj, alreadyInstalled )
             % Goes over the list of dependecies and installs their
             % dependencies
             % Inputs: 
-            % (none)
-            % Outputs
+            % (1) alreadyInstalled (default: []): a list of dependecies
+            %       that are already installed (perhaps by other
+            %       dependecies and thus do not need to be installed.
+                        % Outputs
             % (none)
             % Usage sample: 
             %   pm = PackMan();
             %   obj.recurse();
             
+            if nargin < 2, alreadyInstalled = []; end
+
             for di = 1:length( obj.depList )
                 pm = obj.createDepPackMan( obj.depList(di) );
-                pm.install();
+                pm.install( alreadyInstalled );
             end
         end
         

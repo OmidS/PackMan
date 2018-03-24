@@ -42,6 +42,43 @@ classdef DepMatRepo
                 'GetLatest', obj.GetLatest ...
             );
         end
+        function bol = eq(obj1,obj2)
+            if ~strcmp(class(obj1),class(obj2))
+                error('Objects are not of the same class')
+            end
+            s1 = numel(obj1);
+            s2 = numel(obj2);
+            if s1 == s2
+                bol = false(size(obj1));
+                for k=1:s1
+                    bol(k) = scalarExpEq(obj1(k),obj2(k));
+                 end
+            elseif s1 == 1
+                bol = scalarExpEq(obj2,obj1);
+            elseif s2 == 1
+                bol = scalarExpEq(obj1,obj2);
+            else
+                error('Dimension missmatch')
+            end
+            function ret = scalarExpEq(ns,s)
+                % ns is nonscalar array
+                % s is scalar array
+                ret = false(size(ns));
+                n = numel(ns);
+                for kk=1:n
+                    if isequal(ns(kk).Name, s.Name) && ...
+                       isequal(ns(kk).Branch, s.Branch) && ...
+                       isequal(ns(kk).Url, s.Url) && ...
+                       isequal(ns(kk).FolderName, s.FolderName) && ...
+                       isequal(ns(kk).Commit, s.Commit) && ...
+                       isequal(ns(kk).GetLatest, s.GetLatest) 
+                        ret(kk) = true;
+                    else
+                        ret(kk) = false;
+                    end
+                end
+             end
+        end
     end
     
 end
