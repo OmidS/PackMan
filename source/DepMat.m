@@ -17,6 +17,7 @@ classdef DepMat
         RepoUpdaterList
         RepoDirList
         RepoNameList
+        dispHandler = @(x)(disp(x))
     end
     
     methods
@@ -34,6 +35,7 @@ classdef DepMat
                 repoCombinedName = repo.FolderName;
                 repoSourceDir = fullfile(obj.RootSourceDir, repoCombinedName);
                 repo = DepMatRepositoryUpdater(repoSourceDir, repo);
+                repo.setDispHandler(obj.dispHandler);
                 obj.RepoUpdaterList(repoIndex) = repo;
                 obj.RepoDirList{repoIndex} = repoSourceDir;
                 obj.RepoNameList{repoIndex} = repoCombinedName;
@@ -68,6 +70,13 @@ classdef DepMat
             end
 
         end
+        
+        function setDispHandler(obj, funcHandle)
+            obj.dispHandler = funcHandle;
+            for repoIndex = 1:length(obj.RepoUpdaterList)
+                obj.RepoUpdaterList(repoIndex).setDispHandler(obj.dispHandler);
+            end
+        end
     end
     
     methods (Static)
@@ -76,7 +85,7 @@ classdef DepMat
             success = return_value == 0;
             if ~success
                 if strfind(output, 'Protocol https not supported or disabled in libcurl')
-                    disp('! You need to modify the the DYLD_LIBRARY_PATH environment variable to point to a newer version of libcurl. The version installed with Matlab does not support using https with git.');
+                    obj.dispHandler('! You need to modify the the DYLD_LIBRARY_PATH environment variable to point to a newer version of libcurl. The version installed with Matlab does not support using https with git.');
                 end
             end
         end
@@ -115,7 +124,7 @@ classdef DepMat
                     end
                 end
             catch exception
-                disp(['DepMat:fixCurlPath error: ' exception.message]);
+                obj.dispHandler(['DepMat:fixCurlPath error: ' exception.message]);
             end
         end
     end

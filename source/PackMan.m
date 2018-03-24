@@ -7,6 +7,7 @@ classdef PackMan < handle & matlab.mixin.Copyable
         parentDir        % Path to main directory of the package
         depDirPath       % Path to subdirectory for dependencies
         packageFilePath  % Path to package info file
+        dispHandler = @(x)(disp(x))
     end
     
     methods
@@ -67,13 +68,14 @@ classdef PackMan < handle & matlab.mixin.Copyable
             
         end
         
-        function install(obj, alreadyInstalled)
+        function install(obj, alreadyInstalled, depth)
             % Installs/update dependecies in the dep directory
             % Inputs: 
             % (1) alreadyInstalled (default: []): a list of dependecies
             %       that are already installed (perhaps by other
             %       dependecies and thus do not need to be installed.
-            % Outputs
+            % (2) depth (default: 0): depth of recursion
+            % Outputs:
             % (none)
             % Usage sample: 
             %   pm = PackMan();
@@ -82,25 +84,27 @@ classdef PackMan < handle & matlab.mixin.Copyable
             if isempty(obj.depList), return; end
             
             if nargin < 2, alreadyInstalled = []; end
+            if nargin < 3, depth = 0; end
             
-            fprintf('Installing dependencies for %s...\n', obj.parentDir);
+            obj.dispHandler(sprintf('Installing dependencies for %s...', obj.parentDir));
             
             for i = 1:length(obj.depList)
                 thisDep = obj.depList(i);
                 if ismember(thisDep, alreadyInstalled)
-                    fprintf('%s already installed (commit: %s...)\n', thisDep.Name, thisDep.Commit(1:min(4,length(thisDep.Commit))));
+                    obj.dispHandler(sprintf('- %s already installed (commit: %s...)', thisDep.Name, thisDep.Commit(1:min(4,length(thisDep.Commit)))));
                 else
                     depMat = DepMat(thisDep, obj.depDirPath);
+                    depMat.setDispHandler( @(x)(obj.dispHandler(sprintf('- %s', x))) );
                     depMat.cloneOrUpdateAll;
                     alreadyInstalled = cat(1, alreadyInstalled, thisDep);
                 end
             end
             
             obj.saveToFile();
-            obj.recurse( alreadyInstalled );
+            obj.recurse( alreadyInstalled, depth );
         end
         
-        function recurse( obj, alreadyInstalled )
+        function recurse( obj, alreadyInstalled, depth )
             % Goes over the list of dependecies and installs their
             % dependencies
             % Inputs: 
@@ -108,16 +112,21 @@ classdef PackMan < handle & matlab.mixin.Copyable
             %       that are already installed (perhaps by other
             %       dependecies and thus do not need to be installed.
                         % Outputs
+            % (2) depth (default: 0): depth of recursion
+            % Outputs:
             % (none)
             % Usage sample: 
             %   pm = PackMan();
             %   obj.recurse();
             
             if nargin < 2, alreadyInstalled = []; end
+            if nargin < 3, depth = 0; end
 
             for di = 1:length( obj.depList )
                 pm = obj.createDepPackMan( obj.depList(di) );
-                pm.install( alreadyInstalled );
+                preS = repmat('  ', [depth, 1]);
+                pm.dispHandler = @(x)( fprintf('%s  %s\n', preS, x) );
+                pm.install( alreadyInstalled, 1 + depth );
             end
         end
         
@@ -183,6 +192,10 @@ classdef PackMan < handle & matlab.mixin.Copyable
             else
                 save(pkgFile, 'dependencies');
             end
+        end
+        
+        function setDispHandler(obj, funcHandle)
+            obj.dispHandler = funcHandle;
         end
     end
     

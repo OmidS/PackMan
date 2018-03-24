@@ -13,6 +13,7 @@ classdef DepMatRepositoryUpdater < handle
     properties (SetAccess = private)
         SourceDir
         RepoDef
+        dispHandler = @(x)(disp(x))
     end
     
     properties (Constant, Access = private)
@@ -94,7 +95,7 @@ classdef DepMatRepositoryUpdater < handle
                 status = obj.getStatus;
             catch ex
                 success = false;
-                disp(['! ' obj.RepoDef.Name ' unable to check for updates']);
+                obj.dispHandler(['! ' obj.RepoDef.Name ' unable to check for updates']);
                 return;
             end
             
@@ -104,49 +105,49 @@ classdef DepMatRepositoryUpdater < handle
                         DepMatStatus.FetchFailure}
                     success = obj.cloneRepo;
                     if success
-                        fprintf('%s added (commit: %s...)\n', obj.RepoDef.Name, obj.RepoDef.Commit(1:min(4, length(obj.RepoDef.Commit))));
+                        obj.dispHandler(sprintf('%s added (commit: %s...)', obj.RepoDef.Name, obj.RepoDef.Commit(1:min(4, length(obj.RepoDef.Commit)))));
                         changed = true;
                     else
-                        disp(['! ' obj.RepoDef.Name ' could not be added']);
+                        obj.dispHandler(['! ' obj.RepoDef.Name ' could not be added']);
                     end
                     
                 case DepMatStatus.UpToDate
                     success = true;
-                    fprintf('%s up to date (commit: %s...)\n', obj.RepoDef.Name, obj.RepoDef.Commit(1:min(4, length(obj.RepoDef.Commit))));
+                    obj.dispHandler(sprintf('%s up to date (commit: %s...)', obj.RepoDef.Name, obj.RepoDef.Commit(1:min(4, length(obj.RepoDef.Commit)))));
                     
                 case DepMatStatus.UpToDateButWrongHead
-                    disp([obj.RepoDef.Name ' up to date but at wrong head']);
+                    obj.dispHandler([obj.RepoDef.Name ' up to date but at wrong head']);
                     [success, changed, headCommitId] = obj.checkoutCommit;
                     if success
-                        disp([obj.RepoDef.Name ' checked out specified commit: ', headCommitId]);
+                        obj.dispHandler([obj.RepoDef.Name ' checked out specified commit: ', headCommitId]);
                         changed = true;
                     else
-                        disp(['! ' obj.RepoDef.Name ' could not check out ', obj.RepoDef.Commit]);
+                        obj.dispHandler(['! ' obj.RepoDef.Name ' could not check out ', obj.RepoDef.Commit]);
                     end
                     
                 case DepMatStatus.UpdateAvailable
                     success = obj.updateRepo;
                     if success
-                        fprintf('%s updated (commit: %s...)\n', obj.RepoDef.Name, obj.RepoDef.Commit(1:min(4, length(obj.RepoDef.Commit))));
+                        obj.dispHandler(sprintf('%s updated (commit: %s...)', obj.RepoDef.Name, obj.RepoDef.Commit(1:min(4, length(obj.RepoDef.Commit)))));
                         changed = true;
                     else
-                        disp(['! ' obj.RepoDef.Name ' could not be updated']);
+                        obj.dispHandler(['! ' obj.RepoDef.Name ' could not be updated']);
                     end
                     
                 case DepMatStatus.LocalChanges
                     success = false;
-                    disp(['! ' obj.RepoDef.Name ' could not be updated as there are local changes']);
+                    obj.dispHandler(['! ' obj.RepoDef.Name ' could not be updated as there are local changes']);
                     
                 case DepMatStatus.GitNotFound
                     success = false;
-                    disp(['! ' obj.RepoDef.Name ' could not be updated as git is not installed or not in the path']);
+                    obj.dispHandler(['! ' obj.RepoDef.Name ' could not be updated as git is not installed or not in the path']);
                     
                 case DepMatStatus.GitFailure
                     success = false;
-                    disp(['! ' obj.RepoDef.Name ' could not be updated as the git commands returned a failure']);
+                    obj.dispHandler(['! ' obj.RepoDef.Name ' could not be updated as the git commands returned a failure']);
                     
                 otherwise
-                    disp(['! ' obj.RepoDef.Name ' could not be updated']);
+                    obj.dispHandler(['! ' obj.RepoDef.Name ' could not be updated']);
             end
         end
         
@@ -156,13 +157,17 @@ classdef DepMatRepositoryUpdater < handle
                 cd(obj.SourceDir);
                 [success, changed, headCommitId] = obj.internalCheckoutCommit;
                 if (~success)
-                    disp(['! ' obj.RepoDef.Name ' could not check out specified commit (',obj.RepoDef.Commit,')']);
+                    obj.dispHandler(['! ' obj.RepoDef.Name ' could not check out specified commit (',obj.RepoDef.Commit,')']);
                 end                
                 cd(lastDir);
             catch ex
                 cd(lastDir);
                 success = false;
             end
+        end
+        
+        function setDispHandler(obj, funcHandle)
+            obj.dispHandler = funcHandle;
         end
         
     end
