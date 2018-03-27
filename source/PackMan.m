@@ -93,6 +93,12 @@ classdef PackMan < handle & matlab.mixin.Copyable
                 if ismember(thisDep, alreadyInstalled)
                     obj.dispHandler(sprintf('- %s already installed (commit: %s...)', thisDep.Name, thisDep.Commit(1:min(4,length(thisDep.Commit)))));
                 else
+                    for j = 1:length(alreadyInstalled)
+                        if isequal(thisDep.Url, alreadyInstalled(j).Url) && ...
+                          ~isequal(thisDep.Commit, alreadyInstalled(j).Commit)
+                            warning('PackMan:install:versionConflict', 'Two different versions of %s are added as dependencies! THIS WILL LIKELY BE VERY DANGEROUS! PLEASE FIX!\n', thisDep.Url);
+                        end
+                    end
                     depMat = DepMat(thisDep, obj.depDirPath);
                     depMat.setDispHandler( @(x)(obj.dispHandler(sprintf('- %s', x))) );
                     depMat.cloneOrUpdateAll;
