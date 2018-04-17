@@ -105,7 +105,7 @@ classdef DepMatRepositoryUpdater < handle
                         DepMatStatus.FetchFailure}
                     success = obj.cloneRepo;
                     if success
-                        obj.dispHandler(sprintf('%s added (commit: %s...)', obj.RepoDef.Name, obj.RepoDef.Commit(1:min(4, length(obj.RepoDef.Commit)))));
+                        obj.dispHandler(sprintf('%s added (%s)', obj.RepoDef.Name, obj.RepoDef.getVersionStr()));
                         changed = true;
                     else
                         obj.dispHandler(['! ' obj.RepoDef.Name ' could not be added']);
@@ -113,7 +113,7 @@ classdef DepMatRepositoryUpdater < handle
                     
                 case DepMatStatus.UpToDate
                     success = true;
-                    obj.dispHandler(sprintf('%s up to date (commit: %s...)', obj.RepoDef.Name, obj.RepoDef.Commit(1:min(4, length(obj.RepoDef.Commit)))));
+                    obj.dispHandler(sprintf('%s up to date (%s)', obj.RepoDef.Name, obj.RepoDef.getVersionStr()));
                     
                 case DepMatStatus.UpToDateButWrongHead
                     obj.dispHandler([obj.RepoDef.Name ' up to date but at wrong head']);
@@ -128,7 +128,7 @@ classdef DepMatRepositoryUpdater < handle
                 case DepMatStatus.UpdateAvailable
                     success = obj.updateRepo;
                     if success
-                        obj.dispHandler(sprintf('%s updated (commit: %s...)', obj.RepoDef.Name, obj.RepoDef.Commit(1:min(4, length(obj.RepoDef.Commit)))));
+                        obj.dispHandler(sprintf('%s updated (%s)', obj.RepoDef.Name, obj.RepoDef.getVersionStr()));
                         changed = true;
                     else
                         obj.dispHandler(['! ' obj.RepoDef.Name ' could not be updated']);
