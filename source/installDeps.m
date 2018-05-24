@@ -6,6 +6,7 @@
 %               for dependencies. If you use something other than the
 %               default, don't forget to add it to .gitignore so that git
 %               doesn't track it. 
+%     - (3 and later): will be passed to PackMan as the 3rd and later inputs.
 %   Outputs:
 %     - (1) pm (optional): the package manager object. This object can be
 %               used to manually install deps by calling:
