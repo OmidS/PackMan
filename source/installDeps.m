@@ -18,7 +18,7 @@
 %       % Then simply call this any time you want to install/update:
 %       installDeps
 
-function varargout = installDeps( depList, depSubDir )
+function varargout = installDeps( depList, depSubDir, varargin )
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Directory of dependencies
@@ -34,7 +34,7 @@ if nargin < 1 || isempty(depList)
     depList = getDepList();
 end
 
-pm = PackMan(depList, depSubDir); % Install other dependencies
+pm = PackMan(depList, depSubDir, varargin{:}); % Install other dependencies
 
 if nargout < 1
     pm.install();
