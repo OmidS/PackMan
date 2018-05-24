@@ -45,6 +45,30 @@ classdef PackMan < handle & matlab.mixin.Copyable
             if nargout < 1
                 obj.install();
             end
+            
+            try
+                % Attempt to update "installDeps.m" if needed
+                [ST] = dbstack();
+                if length(ST) == 2 && strcmp(ST(2).file, 'installDeps.m')
+                    [ST] = dbstack('-completenames');
+                    % Called from "installDeps.m". Check for its updates
+                    oldFilePath = ST(2).file;
+                    newFileDir = fullfile(fileparts(ST(1).file), 'installDeps.m');
+                    fileO = javaObject('java.io.File', oldFilePath);
+                    fileN = javaObject('java.io.File', newFileDir);
+                    if ~javaMethod('contentEquals','org.apache.commons.io.FileUtils', fileO, fileN)
+                        fprintf('=====\n');
+                        fprintf('A new version of "installDeps.m" seems to be available.\n');
+                        fprintf('PackMan will now replace your "installDeps.m" with the new file by runnig:\n');
+                        cmdStr = sprintf('copyfile(''%s'', ''%s'');', newFileDir, oldFilePath);
+                        fprintf('>> %s\n', cmdStr);
+                        copyfile(newFileDir, oldFilePath);
+                        fprintf('Done. "installDeps.m" was updated from "%s".\n', newFileDir);
+                        fprintf('=====\n');
+                    end
+                end
+            catch
+            end
         end
         
         function obj = addPackageFileDeps( obj )
