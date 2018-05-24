@@ -82,4 +82,31 @@ packManSourceDir = fullfile(packManDir,'source');
 
 addpath(genpath(packManSourceDir));
 
+try
+    updateInstallDepsScript(packManSourceDir);
+catch
+end
+
+end
+
+function updateInstallDepsScript(packManSourceDir)
+    installDepsPath = fullfile(packManSourceDir, 'installDeps.m');
+    if exist(installDepsPath, 'file')
+        % Attempt to update installDeps.m
+        thisFilePath = [mfilename('fullpath'), '.m'];
+        fileN = javaObject('java.io.File', installDepsPath);
+        fileO = javaObject('java.io.File', thisFilePath);
+        is_equal = javaMethod('contentEquals','org.apache.commons.io.FileUtils',...
+                              fileN, fileO);
+        if ~is_equal
+            fprintf('=====\n');
+            fprintf('A new version of installDeps.m seems to be available.\n');
+            fprintf('PackMan will now replace your "installDeps.m" with the new file by runnig:\n');
+            cmdStr = sprintf('copyfile(''%s'', ''%s'');', installDepsPath, thisFilePath);
+            fprintf('>> %s\n', cmdStr);
+            copyfile(installDepsPath, thisFilePath);
+            fprintf('Done. "installDeps.m" was updated from "%s".\n', installDepsPath);
+            fprintf('=====\n');
+        end
+    end
 end
