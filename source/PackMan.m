@@ -32,7 +32,13 @@ classdef PackMan < handle & matlab.mixin.Copyable
             
             if nargin < 1 || isempty(depList), depList = DepMat.empty; end
             if nargin < 2 || isempty(depDirPath), depDirPath = fullfile(obj.parentDir, '/external'); end
-            if nargin < 3 || isempty(packageFilePath), packageFilePath = fullfile(obj.parentDir, '/package.mat'); end
+            if nargin < 3 || isempty(packageFilePath)
+                if exist('jsonencode', 'builtin')
+                    packageFilePath = fullfile(obj.parentDir, '/package.json'); 
+                else
+                    packageFilePath = fullfile(obj.parentDir, '/package.mat'); 
+                end
+            end
             
             [depListOk, message] = PackMan.isDepListValid(depList);
             if ~depListOk, error('PackMan:DepListError', 'Problem in depList:%s\n', message); end
@@ -222,10 +228,27 @@ classdef PackMan < handle & matlab.mixin.Copyable
                 end
             end
 
-            if exist(pkgFile, 'file')
-                save(pkgFile, 'dependencies', '-append');
+            [~,~,ext] = fileparts(pkgFile);
+            if strcmpi(ext, '.mat')
+                if exist(pkgFile, 'file')
+                    save(pkgFile, 'dependencies', '-append');
+                else
+                    save(pkgFile, 'dependencies');
+                end
+            elseif strcmpi(ext, '.json')
+                if exist(pkgFile, 'file')
+                    fD = jsondecode( fileread(pkgFile) );
+                end
+                if ~isfield(fD, 'dependencies')
+                    fD.dependencies = dependencies;
+                end
+                fNames = fieldnames(dependencies);
+                for fi = 1:length(fNames)
+                    fD.dependencies.(fNames{fi}) = dependencies.(fNames{fi});
+                end
+                PackMan.saveAsJSON(fD, pkgFile);
             else
-                save(pkgFile, 'dependencies');
+                error('File with extension "%s" is not supported!\n', ext);
             end
         end
         
@@ -300,17 +323,41 @@ classdef PackMan < handle & matlab.mixin.Copyable
             % Outputs: 
             % (2) depList: depList extracted from file
             % Usage sample: 
-            %   depList = PackMan.loadFromPackageFile( './package.mat' );
+            %   depList = PackMan.loadFromPackageFile( './package.json' );
             
-            if nargin < 1, filePath = './package.mat'; end
+            if nargin < 1 
+                if exist('jsonencode', 'builtin')
+                    filePath = './package.json'; 
+                else
+                    filePath = './package.mat'; 
+                end
+            end
 
             depList = [];
+            
+            [~,~,ext] = fileparts(filePath);
+            if strcmpi(ext, '.json') && ~exist(filePath, 'file')&&exist([filePath(1:(end-5)),'.mat'], 'file') % Old mat file exists, switch to json
+                pkgFileMat = [filePath(1:(end-5)),'.mat'];
+                fD = load(pkgFileMat);
+                if PackMan.saveAsJSON(fD, filePath)
+                    fprintf('".mat" package file was converted to JSON and saved as: "%s"\n', filePath);
+                    if movefile(pkgFileMat, [pkgFileMat,'.bak'])
+                        fprintf('Original ".mat" package file was renamed to for backup "%s"\n', [pkgFileMat,'.bak']);
+                    end
+                end
+            end
 
             if ~exist(filePath, 'file'), return; end
-            fData = load(filePath);
 
+            if strcmpi(ext, '.mat')
+                fData = load(filePath);
+            elseif strcmpi(ext, '.json')
+                fData = jsondecode( fileread(filePath) );
+            else
+                error('File with extension "%s" is not supported!\n', ext);
+            end
+            
             if ~isfield(fData, 'dependencies'), return; end
-
             fieldNames = fieldnames( fData.dependencies );
 
             for i = 1:length(fieldNames)
@@ -319,6 +366,66 @@ classdef PackMan < handle & matlab.mixin.Copyable
                 thisRepo = DepMatRepo(fieldData.Name, fieldData.Branch, fieldData.Url, fieldData.FolderName, fieldData.Commit);
                 depList = cat(1, depList, thisRepo);
             end
+        end
+        
+        function ok = saveAsJSON(dataStruct, savePath, prettify)
+            if nargin < 3, prettify = true; end
+            try
+                JSON = PackMan.covertToJson(dataStruct, prettify);
+                fId = fopen(savePath, 'w+'); 
+                if fId > -1
+                    fprintf(fId, '%s', JSON);
+                    fclose(fId);
+                else
+                    ok = false;
+                end
+                ok = true;
+            catch
+                ok = false;
+            end
+        end
+        
+        function JSON = covertToJson(dataStruct, prettify)
+            % Converts data struct to pretty json
+            % Inputs:
+            % (1) dataStruct: data to be coverted
+            % (2) pretty (default: true): if true, will attempty to make
+            %       JSON more human readable
+            % Outputs:
+            % (1) JSON: JSON string
+            
+            if nargin < 2, prettify = true; end
+            JSON = jsonencode( dataStruct );
+            if prettify
+                JSON2 = JSON;
+                JSON2 = strrep(JSON2, ',', sprintf(',\n'));
+                JSON2 = strrep(JSON2, '{', sprintf('{\n'));
+                JSON2 = strrep(JSON2, '}', sprintf('\n}'));
+                indentCnt = 0;
+                i = 1;
+                while i <= length(JSON2)
+                    if strcmp(JSON2(i), '{')
+                        indentCnt = indentCnt + 1;
+                    elseif strcmp(JSON2(i), '}')
+                        indentCnt = indentCnt - 1;
+                        if i > 1 && strcmp(JSON2(i-1), sprintf('\n'))
+                            JSON2 = PackMan.replaceStrAtIndex(JSON2, i, [repmat(' ', [1, indentCnt]), '}']);
+                        end
+                        i = i + indentCnt;
+                    elseif strcmp(JSON2(i), '"') && i > 1 && strcmp(JSON2(i-1), sprintf('\n'))
+                        JSON2 = PackMan.replaceStrAtIndex(JSON2, i, [repmat(' ', [1, indentCnt]), '"']);
+                        i = i + indentCnt;
+                    end
+                    i = i + 1;
+                end
+                JSON = JSON2;
+            end
+        end
+        function strO = replaceStrAtIndex(str, ind, newStr)
+            strO = '';
+            if ind > 1, strO = str(1:(ind-1)); end
+            strO = sprintf('%s%s', strO, newStr);
+            if ind < length(str), strO = sprintf('%s%s', strO, str((ind+1):end)); end
         end
     end 
 end
