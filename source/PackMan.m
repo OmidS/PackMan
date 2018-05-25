@@ -353,6 +353,21 @@ classdef PackMan < handle & matlab.mixin.Copyable
                 fData = load(filePath);
             elseif strcmpi(ext, '.json')
                 fData = jsondecode( fileread(filePath) );
+                if isfield(fData, 'dependencies')&&isstruct(fData.dependencies)
+                    pNames = fieldnames(fData.dependencies);
+                    for p = 1:length(pNames)
+                        % Fix field name cases 
+                        fDNames = fieldnames(fData.dependencies.(pNames{p}));
+                        DepMatRepFNames = properties(DepMatRepo);
+                        for fi = 1:length(fDNames)
+                            if any(strcmpi(fDNames{fi}, DepMatRepFNames))&&~any(strcmp(fDNames{fi}, DepMatRepFNames))
+                                fNewName = DepMatRepFNames{find(strcmpi(fDNames{fi}, DepMatRepFNames), 1)};
+                                fData.dependencies.(pNames{p}).(fNewName) = fData.dependencies.(pNames{p}).(fDNames{fi});
+                                fData.dependencies.(pNames{p}) = rmfield(fData.dependencies.(pNames{p}), fDNames{fi});
+                            end
+                        end
+                    end
+                end
             else
                 error('File with extension "%s" is not supported!\n', ext);
             end
