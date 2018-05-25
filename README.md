@@ -8,13 +8,29 @@ Let's say you have a MATLAB project and you want to be able to use external pack
 You will need to do the following once, to enable package management with PackMan for your project:
 - Make sure there is no directory called 'external' at the root directory of your project
 - Copy "[installDeps.m](https://github.com/OmidS/PackMan/blob/master/source/installDeps.m)" to the root directory of your project
-- Copy "[getDepList.m](https://github.com/OmidS/PackMan/blob/master/source/getDepList.m)" to the root directory of your project
+- (Optional) Copy "[getDepList.m](https://github.com/OmidS/PackMan/blob/master/source/getDepList.m)" to the root directory of your project.
 
 Done! Your project is now equipped with dependency management.
 
 ## Add/remove dependencies
 You will need to do the following any time you want to add/remove a dependency
-- Modify "getDepList.m" to make sure it lists the dependencies that you want. It is good to also have PackMan itself in the dependency list (uncomment line 10 of getDepList.m)
+- (Option 1) Update the list of dependencies in a file called package.json (for R2016b and later). PackMan will create a package.json file the first time you call "installDeps.m". Each dependency can have the fields listed in the following sample "package.json":
+```
+{
+ "dependencies":{
+  "PackMan":{
+   "Name":"PackMan",
+   "Branch":"master",
+   "Url":"https://github.com/OmidS/PackMan.git",
+   "FolderName":"PackMan",
+   "Commit":"",
+   "GetLatest":true
+  }
+ }
+}
+```
+
+- (Option 2) Modify "getDepList.m" to make sure it lists the dependencies that you want. It is good to also have PackMan itself in the dependency list (uncomment line 10 of getDepList.m)
 
 Note: when removing any repositories, it is best to delete the 'external' directory completely so that PackMan starts fresh.
 
