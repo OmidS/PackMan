@@ -377,8 +377,10 @@ classdef PackMan < handle & matlab.mixin.Copyable
 
             for i = 1:length(fieldNames)
                 fieldData = fData.dependencies.( fieldNames{i} );
+                if ~isfield(fieldData, 'FolderName'), fieldData.FolderName = fieldData.Name; end
                 if ~isfield(fieldData, 'Commit'), fieldData.Commit = ''; end
-                thisRepo = DepMatRepo(fieldData.Name, fieldData.Branch, fieldData.Url, fieldData.FolderName, fieldData.Commit);
+                if ~isfield(fieldData, 'GetLatest'), fieldData.GetLatest = true; end
+                thisRepo = DepMatRepo(fieldData.Name, fieldData.Branch, fieldData.Url, fieldData.FolderName, fieldData.Commit, fieldData.GetLatest);
                 depList = cat(1, depList, thisRepo);
             end
         end
