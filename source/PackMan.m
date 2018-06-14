@@ -120,13 +120,14 @@ classdef PackMan < handle & matlab.mixin.Copyable
             
             for i = 1:length(obj.depList)
                 thisDep = obj.depList(i);
-                if ismember(thisDep, alreadyInstalled)
-                    obj.dispHandler(sprintf('- %s already installed (commit: %s...)', thisDep.Name, thisDep.Commit(1:min(4,length(thisDep.Commit)))));
+                if ~isempty(alreadyInstalled) && (ismember(thisDep, alreadyInstalled) || any(strcmp(thisDep.Commit, {alreadyInstalled.Commit}))) % Assumes identical commid id means identical code
+                    obj.dispHandler(sprintf('- %s already installed (%s...)', thisDep.Name, thisDep.getVersionStr()));
                 else
                     conflict = false;
                     for j = 1:length(alreadyInstalled)
-                        if isequal(thisDep.Url, alreadyInstalled(j).Url) && ...
-                          ~isequal(thisDep.Commit, alreadyInstalled(j).Commit)
+                        if (isequal(thisDep.Url, alreadyInstalled(j).Url) || ...
+                            isequal(strrep(thisDep.Url, '.git', ''), strrep(alreadyAdded(j).Url, '.git', ''))) && ...
+                           ~isequal(thisDep.Commit, alreadyInstalled(j).Commit)
                             conflict = true;
                         end
                     end
@@ -136,7 +137,8 @@ classdef PackMan < handle & matlab.mixin.Copyable
                         depMat.cloneOrUpdateAll;
                         alreadyInstalled = cat(1, alreadyInstalled, thisDep);
                     else
-                        warning('PackMan:install:versionConflict', 'Two different versions of %s were listed as dependencies! Aborted installation of the following version:  (%s)!\n', thisDep.Url, thisDep.getVersionStr());
+                        pm = obj.createDepPackMan( thisDep );
+                        warning('PackMan:install:versionConflict', 'Two different versions of %s were listed as dependencies! Aborted installation of the following version:  (%s, to be installed in in "%s")!\n', thisDep.Url, thisDep.getVersionStr(), pm.parentDir);
                     end
                 end
             end
@@ -152,7 +154,6 @@ classdef PackMan < handle & matlab.mixin.Copyable
             % (1) alreadyInstalled (default: []): a list of dependecies
             %       that are already installed (perhaps by other
             %       dependecies and thus do not need to be installed.
-                        % Outputs
             % (2) depth (default: 0): depth of recursion
             % Outputs:
             % (none)
@@ -171,24 +172,47 @@ classdef PackMan < handle & matlab.mixin.Copyable
             end
         end
         
-        function paths = genPath( obj )
+        function [paths, varargout] = genPath( obj, alreadyAdded )
             % Generates a string of dependency directories
             % Inputs: 
-            % -(none)
+            % - (1) alreadyAdded (default: []): a list of dependecies
+            %       that are already added to the path list (perhaps by other
+            %       dependecies and thus do not need to be added again.
             % Outputs: 
-            % -(1) paths: string of dependencies and recursively of their
+            % - (1) paths: string of dependencies and recursively of their
             %           dependencies
+            % - (2) alreadyAdded: updated list of deps that are added to
+            %           the path list
             % Usage sample: 
             %   pm = PackMan(); 
             %   pm.install(); 
             %   paths = pm.genPath(); 
             %   addpath(paths); 
+            if nargin < 2, alreadyAdded = []; end
             
             paths = '';
             for di = 1:length( obj.depList )
-                pm = obj.createDepPackMan( obj.depList(di) );
-                depPaths = pm.genPath();
-                paths = [paths, depPaths];
+                thisDep = obj.depList(di);
+                if ~isempty(alreadyAdded) && (ismember(thisDep, alreadyAdded) || any(strcmp(thisDep.Commit, {alreadyAdded.Commit}))) % Assumes identical commid id means identical code
+                    obj.dispHandler(sprintf('- %s already added to path list (%s...)', thisDep.Name, thisDep.getVersionStr()));
+                else
+                    conflict = false;
+                    for j = 1:length(alreadyAdded)
+                        if (isequal(thisDep.Url, alreadyAdded(j).Url) || ...
+                            isequal(strrep(thisDep.Url, '.git', ''), strrep(alreadyAdded(j).Url, '.git', ''))) && ...
+                           ~isequal(thisDep.Commit, alreadyAdded(j).Commit)
+                            conflict = true;
+                        end
+                    end
+                    pm = obj.createDepPackMan( thisDep );
+                    if ~conflict
+                        alreadyAdded = cat(1, alreadyAdded, thisDep);
+                        [depPaths, alreadyAdded] = pm.genPath( alreadyAdded );
+                        paths = [paths, depPaths];
+                    else
+                        warning('PackMan:genpath:versionConflict', 'Two different versions of %s were listed as dependencies! Aborted adding of the following version  to the path:  (%s, located in "%s")!\n', thisDep.Url, thisDep.getVersionStr(), pm.parentDir);
+                    end
+                end
             end
             % Add subpaths of this package
             files = dir(obj.parentDir);
@@ -200,6 +224,7 @@ classdef PackMan < handle & matlab.mixin.Copyable
                 paths = [paths, genpath(subDirPath)];
             end
             paths = [paths, obj.parentDir, ';'];
+            if nargout > 1, varargout{1} = alreadyAdded; end
         end
         
         function pm = createDepPackMan( obj, dep )
