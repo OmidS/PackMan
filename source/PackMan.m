@@ -194,6 +194,7 @@ classdef PackMan < handle & matlab.mixin.Copyable
             paths = '';
             for di = 1:length( obj.depList )
                 thisDep = obj.depList(di);
+                obj.dispHandler(sprintf('Considering dep %s (%s)', thisDep.Name, thisDep.Commit));
                 if ~isempty(alreadyAdded) && (ismember(thisDep, alreadyAdded) || any(strcmp(thisDep.Commit, {alreadyAdded.Commit}))) % Assumes identical commid id means identical code
                     obj.dispHandler(sprintf('- %s already added to path list (%s...)', thisDep.Name, thisDep.getVersionStr()));
                 else
@@ -333,7 +334,7 @@ classdef PackMan < handle & matlab.mixin.Copyable
                 if isempty(ind)
                     ind = length(depListOut) + 1; 
                 else
-                    BU = depListOut(i);
+                    BU = depListOut(ind);
                     if isempty(depList2(i).Commit) % Do not erase commit id if not mentioned in new depList
                         depList2(i).Commit = BU.Commit; 
                     end
