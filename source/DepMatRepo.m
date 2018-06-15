@@ -80,7 +80,7 @@ classdef DepMatRepo
              end
         end
         function str = getVersionStr(obj)
-            str = sprintf('Commit: %s...', obj.Commit(1:min(4, length(obj.Commit))));
+            str = sprintf('Commit: %s...', obj.Commit(1:min(7, length(obj.Commit))));
         end
     end
     
