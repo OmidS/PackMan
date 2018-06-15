@@ -70,19 +70,19 @@ classdef DepMatRepositoryUpdater < handle
             end            
         end
         
-        function success = updateRepo(obj)
+        function [success, output] = updateRepo(obj)
             % Attempts to update the repository. Only do this if the status
             % is DepMatStatus.UpdateAvailable
             
             lastDir = pwd;
             try
                 cd(obj.SourceDir);
-                success = obj.internalUpdateRepo;
-                cd(lastDir);
-            catch ex
-                cd(lastDir);
+                [success, output] = obj.internalUpdateRepo;
+            catch ME
                 success = false;
+                output = '';
             end
+            cd(lastDir);
         end
         
         function [success, changed] = cloneOrUpdate(obj)
@@ -126,12 +126,12 @@ classdef DepMatRepositoryUpdater < handle
                     end
                     
                 case DepMatStatus.UpdateAvailable
-                    success = obj.updateRepo;
+                    [success, output] = obj.updateRepo;
                     if success
                         obj.dispHandler(sprintf('%s updated (%s)', obj.RepoDef.Name, obj.RepoDef.getVersionStr()));
                         changed = true;
                     else
-                        obj.dispHandler(['! ' obj.RepoDef.Name ' could not be updated']);
+                        obj.dispHandler(['! ' obj.RepoDef.Name ' (located in "' obj.SourceDir '") could not be updated.' sprintf(' %s', output)]);
                     end
                     
                 case DepMatStatus.LocalChanges
@@ -255,9 +255,9 @@ classdef DepMatRepositoryUpdater < handle
             commitHash = strrep(commitHash,sprintf('\n'),''); 
         end
         
-        function success = internalUpdateRepo(obj)
-            pullResult = DepMat.execute('git pull');
-            success = ~isempty(pullResult);
+        function [success, output] = internalUpdateRepo(obj)
+            [pullResult, output] = DepMat.execute('git pull');
+            success = ~isempty(pullResult) && ~isequal(pullResult, 0);
         end
         
         function success = internalCloneRepo(obj)
