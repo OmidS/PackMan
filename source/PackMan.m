@@ -173,12 +173,14 @@ classdef PackMan < handle & matlab.mixin.Copyable
             end
         end
         
-        function [paths, varargout] = genPath( obj, alreadyAdded )
+        function [paths, varargout] = genPath( obj, alreadyAdded, selfPaths )
             % Generates a string of dependency directories
             % Inputs: 
             % - (1) alreadyAdded (default: []): a list of dependecies
             %       that are already added to the path list (perhaps by other
             %       dependecies and thus do not need to be added again.
+            % - (2) selfPaths (default: true): If true, will also add self
+            %       paths (will be set to false in recursive calls)
             % Outputs: 
             % - (1) paths: string of dependencies and recursively of their
             %           dependencies
@@ -190,7 +192,45 @@ classdef PackMan < handle & matlab.mixin.Copyable
             %   paths = pm.genPath(); 
             %   addpath(paths); 
             if nargin < 2, alreadyAdded = []; end
+            if nargin < 3, selfPaths = true; end
             
+            paths = [];
+            if selfPaths
+                % Add subpaths of this package
+                paths = [paths, obj.getSelfPaths()];
+            end
+            % Add parent paths of deps
+            [depSelfPaths, alreadyAdded, nowAdded ] = obj.getDepSelfPaths( alreadyAdded );
+            paths = [paths, depSelfPaths];
+            % Recurse to deps of the added deps
+            for di = 1:length(nowAdded)
+                thisDep = nowAdded(di);
+                pm = obj.createDepPackMan( thisDep );
+                [depPaths, alreadyAdded] = pm.genPath( alreadyAdded, false );
+                paths = [paths, depPaths];
+            end
+            
+            if nargout > 1, varargout{1} = alreadyAdded; end
+        end
+        
+        function [paths, varargout] = getDepSelfPaths(obj, alreadyAdded)
+            % Generates a string of dependency directories
+            % Inputs: 
+            % - (1) alreadyAdded (default: []): a list of dependecies
+            %       that are already added to the path list (perhaps by other
+            %       dependecies and thus do not need to be added again.
+            % Outputs: 
+            % - (1) paths: string of dependencies and recursively of their
+            %           dependencies
+            % - (2) alreadyAdded: updated list of deps that are added to
+            %           the path list
+            % - (3) nowAdded: list of deps that were added in this call
+            % Usage sample: 
+            %   pm.getDepSelfPaths(); 
+
+            if nargin < 2, alreadyAdded = []; end
+            
+            nowAdded = [];
             paths = '';
             for di = 1:length( obj.depList )
                 thisDep = obj.depList(di);
@@ -209,13 +249,20 @@ classdef PackMan < handle & matlab.mixin.Copyable
                     pm = obj.createDepPackMan( thisDep );
                     if ~conflict
                         alreadyAdded = cat(1, alreadyAdded, thisDep);
-                        [depPaths, alreadyAdded] = pm.genPath( alreadyAdded );
+                        nowAdded = cat(1, nowAdded, thisDep);
+                        depPaths = pm.getSelfPaths();
                         paths = [paths, depPaths];
                     else
                         warning('PackMan:genpath:versionConflict', 'Two different versions of %s were listed as dependencies! Aborted adding of the following version  to the path:  (%s, located in "%s")!\n', thisDep.Url, thisDep.getVersionStr(), pm.parentDir);
                     end
                 end
             end
+            if nargout > 1, varargout{1} = alreadyAdded; end
+            if nargout > 2, varargout{2} = nowAdded; end
+        end
+        
+        function paths = getSelfPaths(obj)
+            paths = [];
             % Add subpaths of this package
             files = dir(obj.parentDir);
             files(~[files.isdir]) = [];
@@ -226,7 +273,6 @@ classdef PackMan < handle & matlab.mixin.Copyable
                 paths = [paths, genpath(subDirPath)];
             end
             paths = [paths, obj.parentDir, ';'];
-            if nargout > 1, varargout{1} = alreadyAdded; end
         end
         
         function pm = createDepPackMan( obj, dep )
