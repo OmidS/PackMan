@@ -169,6 +169,13 @@ classdef PackMan < handle & matlab.mixin.Copyable
                 pm = obj.createDepPackMan( obj.depList(di) );
                 preS = repmat('  ', [depth, 1]);
                 pm.dispHandler = @(x)( fprintf('%s  %s\n', preS, x) );
+                if ~obj.depList(di).GetLatest 
+                    % Dependencies should inherit the getLatest of their 
+                    % parent if it is false
+                    for cdi = 1:length(pm.depList)
+                        pm.depList(cdi).GetLatest = false;
+                    end
+                end
                 pm.install( alreadyInstalled, 1 + depth );
             end
         end

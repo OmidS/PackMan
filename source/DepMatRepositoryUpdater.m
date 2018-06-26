@@ -206,42 +206,50 @@ classdef DepMatRepositoryUpdater < handle
                 status = DepMatStatus.GitFailure;
                 return;
             end
-            
-            [success, local_id] = DepMat.execute(['git rev-parse ',obj.RepoDef.Branch,'@{0}']); % Latest local commit
-            if ~success
-                status = DepMatStatus.GitFailure;
-                return;
-            end
-            [success, remote_id] = DepMat.execute(['git rev-parse ',obj.RepoDef.Branch,'@{u}']); % Latest remote commit
-            if ~success
-                status = DepMatStatus.GitFailure;
-                return;
-            end
-            [success, base] = DepMat.execute(['git merge-base ',obj.RepoDef.Branch,'@{0} ',obj.RepoDef.Branch,'@{u}']);
-            if ~success
-                status = DepMatStatus.GitFailure;
-                return;
-            end
-            
             local_id_head = strrep(local_id_head,sprintf('\n'),''); 
-            local_id = strrep(local_id,sprintf('\n'),''); 
-            remote_id = strrep(remote_id,sprintf('\n'),''); 
-            base = strrep(base,sprintf('\n'),''); 
             
-            if strcmp(local_id, remote_id)
-                if (~obj.RepoDef.GetLatest && strcmp(obj.RepoDef.Commit, local_id_head) ) || ...
-                   ( obj.RepoDef.GetLatest && strcmp(local_id, local_id_head) )
+            if ~obj.RepoDef.GetLatest
+                if strcmp(local_id_head, obj.RepoDef.Commit)
                     status = DepMatStatus.UpToDate;
-                    if nargout > 1, varargout{1} = local_id_head; end
                 else
                     status = DepMatStatus.UpToDateButWrongHead;
                 end
-            elseif strcmp(local_id, base)
-                status = DepMatStatus.UpdateAvailable;
-            elseif strcmp(remote_id, base)
-                status = DepMatStatus.LocalChanges;
-            else
-                status = DepMatStatus.Conflict;
+            else % Get the latest commit
+                [success, local_id] = DepMat.execute(['git rev-parse ',obj.RepoDef.Branch,'@{0}']); % Latest local commit
+                if ~success
+                    status = DepMatStatus.GitFailure;
+                    return;
+                end
+                [success, remote_id] = DepMat.execute(['git rev-parse ',obj.RepoDef.Branch,'@{u}']); % Latest remote commit
+                if ~success
+                    status = DepMatStatus.GitFailure;
+                    return;
+                end
+                [success, base] = DepMat.execute(['git merge-base ',obj.RepoDef.Branch,'@{0} ',obj.RepoDef.Branch,'@{u}']);
+                if ~success
+                    status = DepMatStatus.GitFailure;
+                    return;
+                end
+
+                local_id = strrep(local_id,sprintf('\n'),''); 
+                remote_id = strrep(remote_id,sprintf('\n'),''); 
+                base = strrep(base,sprintf('\n'),''); 
+
+                if strcmp(local_id, remote_id)
+                    if (~obj.RepoDef.GetLatest && strcmp(obj.RepoDef.Commit, local_id_head) ) || ...
+                       ( obj.RepoDef.GetLatest && strcmp(local_id, local_id_head) )
+                        status = DepMatStatus.UpToDate;
+                        if nargout > 1, varargout{1} = local_id_head; end
+                    else
+                        status = DepMatStatus.UpToDateButWrongHead;
+                    end
+                elseif strcmp(local_id, base)
+                    status = DepMatStatus.UpdateAvailable;
+                elseif strcmp(remote_id, base)
+                    status = DepMatStatus.LocalChanges;
+                else
+                    status = DepMatStatus.Conflict;
+                end
             end
         end
         
