@@ -462,12 +462,18 @@ classdef PackMan < handle & matlab.mixin.Copyable
             if nargin < 3, prettify = true; end
             try
                 JSON = PackMan.covertToJson(dataStruct, prettify);
-                fId = fopen(savePath, 'w+'); 
-                if fId > -1
-                    fprintf(fId, '%s', JSON);
-                    fclose(fId);
-                else
-                    ok = false;
+                currentFileContent = '';
+                if exist(savePath, 'file')
+                    currentFileContent = fileread(savePath);
+                end
+                if ~isequal(JSON, currentFileContent)
+                    fId = fopen(savePath, 'w+'); 
+                    if fId > -1
+                        fprintf(fId, '%s', JSON);
+                        fclose(fId);
+                    else
+                        ok = false;
+                    end
                 end
                 ok = true;
             catch
