@@ -264,6 +264,12 @@ classdef DepMatRepositoryUpdater < handle
         end
         
         function [success, output] = internalUpdateRepo(obj)
+            [success, output] = DepMat.execute(['git checkout ',obj.RepoDef.Branch]); % Checkout the branch
+            if ~success
+                status = DepMatStatus.GitFailure;
+                return;
+            end
+
             [pullResult, output] = DepMat.execute('git pull');
             success = ~isempty(pullResult) && ~isequal(pullResult, 0);
         end
