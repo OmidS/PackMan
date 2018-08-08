@@ -91,11 +91,7 @@ classdef DepMat
         end
 
         function installed = isGitInstalled
-            if ispc
-                command = 'where git';
-            else
-                command = 'which git';
-            end
+            command = 'git --help';
             
             installed = DepMat.execute(command);
         end
