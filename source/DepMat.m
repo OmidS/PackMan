@@ -103,7 +103,7 @@ classdef DepMat
             
             try
                 if ismac
-                    pathName = 'DYLD_LIBRARY_PATH';
+                    pathName = 'PATH';
                     binDir = '/usr/lib';
                 elseif isunix
                     pathName = 'LD_LIBRARY_PATH';
