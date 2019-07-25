@@ -318,6 +318,8 @@ classdef PackMan < handle & matlab.mixin.Copyable
             elseif strcmpi(ext, '.json')
                 if exist(pkgFile, 'file')
                     fD = jsondecode( fileread(pkgFile) );
+                else
+                    fD = struct;
                 end
                 if ~isfield(fD, 'dependencies')
                     fD.dependencies = dependencies;
