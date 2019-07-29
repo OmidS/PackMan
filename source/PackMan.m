@@ -121,7 +121,10 @@ classdef PackMan < handle & matlab.mixin.Copyable
                     obj.dispHandler(sprintf('Installing dependencies for %s...', obj.parentDir));
                 end
                 thisDep = obj.depList(i);
-                if ~isempty(alreadyInstalled) && (ismember(thisDep, alreadyInstalled) || any(strcmp(thisDep.Commit, {alreadyInstalled.Commit}))) % Assumes identical commid id means identical code
+                if ~isempty(alreadyInstalled) && ( ...
+                        ismember(thisDep, alreadyInstalled) || ...
+                        (~isempty(thisDep.Commit) && any(strcmp(thisDep.Commit, {alreadyInstalled.Commit}))) ... % Assumes identical commid id means identical code
+                    ) 
                     obj.dispHandler(sprintf('- %s already installed (%s...)', thisDep.Name, thisDep.getVersionStr()));
                 else
                     conflict = false;
