@@ -195,8 +195,9 @@ classdef DepMatRepositoryUpdater < handle
                 return;
             end
             
-            [success, local_id] = DepMat.execute('git remote update');
-            if ~success
+            % TODO check this out
+            [faiure, ~] = git('remote update');
+            if faiure
                 status = DepMatStatus.GitFailure;
                 return;
             end
