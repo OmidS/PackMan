@@ -4,7 +4,7 @@ function [status, result] = git(parameterStr)
 fid = fopen( 'executingSignal', 'wt' );
 fclose(fid);
 
-[status, result] = dos(['RunCommand.bat git ' parameterStr ' &']);
+[status, result] = dos([which('RunCommand.bat') ' git ' parameterStr ' &']);
 % [status, result] = system(['pwsh -Command .\RunCommand.ps1 git ' parameterStr ' &']);
 while(isfile('executingSignal'))
     pause(0.2);

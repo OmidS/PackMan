@@ -290,12 +290,14 @@ classdef DepMatRepositoryUpdater < handle
                 end
             end
             
-            if ~DepMat.execute('git fetch')
-                obj.setFetchFailure;
+            % TODO Error handling.
+            % if ~DepMat.execute('git fetch')
+            %     obj.setFetchFailure;
                 
-                success = false;
-                return;
-            end
+            %     success = false;
+            %     return;
+            % end
+            [status, result] = git('fetch');
             
             if ~isempty(obj.RepoDef.Commit)&&~obj.RepoDef.GetLatest
                 checkoutCmd = ['git checkout ' obj.RepoDef.Commit];
