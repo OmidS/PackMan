@@ -21,7 +21,7 @@ You will need to do the following any time you want to add/remove a dependency
   "PackMan":{
    "Name":"PackMan",
    "Branch":"master",
-   "Url":"https://github.com/OmidS/PackMan.git",
+   "Url":"https://github.com/DanielAtKrypton/PackMan.git",
    "FolderName":"PackMan",
    "Commit":"",
    "GetLatest":true

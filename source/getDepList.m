@@ -7,7 +7,7 @@ function depList = getDepList
 depList = [];
 % Arguments for DepMatRepo: DepMatRepo(Name, Branch, Url, FolderName, Commit, GetLatest)
 % Example: 
-% depList           = DepMatRepo('PackMan', 'master', 'https://github.com/OmidS/PackMan.git', 'PackMan', '', true);
+% depList           = DepMatRepo('PackMan', 'master', 'https://github.com/DanielAtKrypton/PackMan.git', 'PackMan', '', true);
 % depList(end+1, 1) = DepMatRepo('depmat', 'master', 'https://github.com/OmidS/depmat.git', 'subid', '', true);
 
 end
