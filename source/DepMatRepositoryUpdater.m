@@ -196,8 +196,8 @@ classdef DepMatRepositoryUpdater < handle
             end
             
             % TODO check this out
-            [faiure, ~] = git('remote update');
-            if faiure
+            [failure, ~] = git('remote update');
+            if failure
                 status = DepMatStatus.GitFailure;
                 return;
             end
