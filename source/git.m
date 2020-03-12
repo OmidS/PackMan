@@ -10,6 +10,7 @@ case 'rev-parse'
 case '--help'
 case 'merge-base'
     [status, result] = system(gitPlusParameters);
+    status = ~status;
 otherwise
     name = getRepoName();
     filename = [name 'CommandOutput'];
