@@ -264,6 +264,7 @@ classdef DepMatRepositoryUpdater < handle
             end
 
             [pullResult, output] = git('pull');
+            pullResult = ~pullResult;
             success = ~isempty(pullResult) && ~isequal(pullResult, 0);
         end
         
