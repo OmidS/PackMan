@@ -72,9 +72,10 @@ function installPackMan( depDirPath )
 packManDir = fullfile(depDirPath, 'PackMan');
 try
     repoUrl = 'https://github.com/DanielAtKrypton/PackMan.git';
-    [failure, cmdout] = git(['clone ', repoUrl, ' "',packManDir,'"']);
-    if (failure), fprintf('%s', cmdout); end
-catch
+    command = ['git clone ', repoUrl, ' "',packManDir,'"'];
+    [status, cmdout] = system(command);
+    if (~status), fprintf('%s', cmdout); end
+catch ME
     
 end
 
