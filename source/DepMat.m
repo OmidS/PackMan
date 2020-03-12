@@ -91,9 +91,8 @@ classdef DepMat
         end
 
         function installed = isGitInstalled
-            command = 'git --help';
-            
-            installed = DepMat.execute(command);
+            failure = git('--help');
+            installed = ~failure;
         end
         
         function fixCurlPath
