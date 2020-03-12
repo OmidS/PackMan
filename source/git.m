@@ -10,7 +10,6 @@ case 'pull'
 case 'fetch'
 otherwise
     [status, result] = system(gitPlusParameters);
-    status = ~status;
     return;
 end
 name = getRepoName();
