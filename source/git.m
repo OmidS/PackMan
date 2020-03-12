@@ -2,7 +2,7 @@ function [status, result] = git(parameterStr)
 %GIT Summary of this function goes here
 %   Detailed explanation goes here
 parametersList = split(parameterStr);
-firstParameter = parametersList(1);
+firstParameter = parametersList{1};
 gitPlusParameters = ['git ' parameterStr];
 switch firstParameter
 case 'checkout'
