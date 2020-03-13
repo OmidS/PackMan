@@ -291,21 +291,22 @@ classdef PackMan < handle & matlab.mixin.Copyable
             
             if (~strcmp(dep.Name,'PackMan'))
                 oldPath = path;
-                try 
+                generatedPath = pm.genPath;
+                generatedPathWithoutLastSemicolon = generatedPath(1:end-1);
+                genPaths = split(generatedPathWithoutLastSemicolon, ';');
+                if (all(cellfun(@exist, genPaths)== 7))
                     addpath(pm.genPath);
-                catch error
-                    disp(error);
-                end
-                s = which('installDeps.m', '-ALL');
-                pathIndexesContainintDepDir = contains(s, depDir);
-                if any(pathIndexesContainintDepDir)
-                    installDepsPath = s{pathIndexesContainintDepDir};
-                    dpDirPth = fileparts(strrep(installDepsPath,depDir,''));
-                    getDepListFunction = fullfile(depDir, dpDirPth, 'getDepList.m');
-                    run(getDepListFunction);
-                    pm = PackMan(ans, fullfile(fileparts(installDepsPath),'external') , '', depDir);
-                else
-                    path(oldPath);
+                    s = which('installDeps.m', '-ALL');
+                    pathIndexesContainintDepDir = contains(s, depDir);
+                    if any(pathIndexesContainintDepDir)
+                        installDepsPath = s{pathIndexesContainintDepDir};
+                        dpDirPth = fileparts(strrep(installDepsPath,depDir,''));
+                        getDepListFunction = fullfile(depDir, dpDirPth, 'getDepList.m');
+                        run(getDepListFunction);
+                        pm = PackMan(ans, fullfile(fileparts(installDepsPath),'external') , '', depDir);
+                    else
+                        path(oldPath);
+                    end
                 end
             end
         end
