@@ -17,7 +17,7 @@ filename = [name 'CommandOutput'];
 fid = fopen(filename , 'wt' );
 fclose(fid);
 
-[status, ~] = dos(['RunCommand.bat ' name ' ' gitPlusParameters ' &']);
+[status, ~] = dos([which('RunCommand.bat') ' ' name ' ' gitPlusParameters ' &']);
 while(true)
     fid = fopen(filename, 'rt' );
     contents = fscanf(fid, '%s\n');
