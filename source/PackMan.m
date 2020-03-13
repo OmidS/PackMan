@@ -116,10 +116,12 @@ classdef PackMan < handle & matlab.mixin.Copyable
             if nargin < 2, alreadyInstalled = []; end
             if nargin < 3, depth = 0; end
             
-            for i = 1:length(obj.depList)
-                if i == 1
-                    obj.dispHandler(sprintf('Installing dependencies for %s...', obj.parentDir));
-                end
+            depListLength = length(obj.depList);
+            if depListLength > 0
+                obj.dispHandler(sprintf('Installing dependencies for %s...', obj.parentDir));
+            end
+            
+            for i = 1:depListLength
                 thisDep = obj.depList(i);
                 if ~isempty(alreadyInstalled) && ( ...
                         ismember(thisDep, alreadyInstalled) || ...
