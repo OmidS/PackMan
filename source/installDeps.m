@@ -75,7 +75,7 @@ try
     command = ['git clone ', repoUrl, ' "',packManDir,'"'];
     [status, cmdout] = system(command);
     if (~status), fprintf('%s', cmdout); end
-catch ME
+catch
     
 end
 
