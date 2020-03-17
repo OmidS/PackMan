@@ -8,6 +8,7 @@ switch firstParameter
 case 'remote'
 case 'pull'
 case 'fetch'
+case 'push'
 otherwise
     [status, result] = system(gitPlusParameters);
     return;
