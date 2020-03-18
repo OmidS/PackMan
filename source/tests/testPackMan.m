@@ -8,96 +8,96 @@ tests = functiontests(localfunctions);
 end
 
 %% Test Functions
-% function testThatPackManConstructorWorks(testCase)
-%     % Test specific code
-%     depList        = {'PackMan', 'release', 'https://github.com/DanielAtKrypton/PackMan.git', 'PackMan', '', true};
-%     depList = cell2struct(depList, {'Name', 'Branch', 'Url', 'FolderName', 'Commit', 'GetLatest'}, 2);    
-% 
-%     pm = prepareTestEnvironmentAndInstall(depList);
-%     verifyEqual(testCase,class(pm),'PackMan');
-% end
-% 
-% function testThatPackManRelativePathsWork(testCase)
-%     % Test specific code
-%     depList        = {'PackMan', 'release', 'https://github.com/DanielAtKrypton/PackMan.git', 'PackMan', '', true};
-%     depList = cell2struct(depList, {'Name', 'Branch', 'Url', 'FolderName', 'Commit', 'GetLatest'}, 2);    
-% 
-%     pm = prepareTestEnvironmentAndInstall(depList);
-%     currentWorkingDir = pwd;
-%     expectedDepDirPath = fullfile(currentWorkingDir, 'source', 'external');
-%     verifyEqual(testCase,pm.depDirPath, expectedDepDirPath);
-%     
-%     expectedPackagePath = fullfile(currentWorkingDir, './package.json');
-%     verifyEqual(testCase,pm.packageFilePath, expectedPackagePath);
-% end
-%  
-% function testThatPackManGeneratesPackageFile(testCase)
-%     % Test specific code
-%     depList        = [
-%         {'PackMan', 'release', 'https://github.com/DanielAtKrypton/PackMan.git', 'PackMan', '', true};
-%         {'DepMat', 'master', 'https://github.com/OmidS/depmat.git', 'depmat', '', true};
-%     ];
-%     depList = cell2struct(depList, {'Name', 'Branch', 'Url', 'FolderName', 'Commit', 'GetLatest'}, 2);    
-%     
-%     prepareTestEnvironment();
-%     pm = installDeps(depList);
-%     
-%     verifyTrue(testCase, ~exist(pm.packageFilePath, 'file'))
-%     
-%     pm.install();
-%     
-%     verifyTrue(testCase, exist(pm.packageFilePath, 'file')~=false );
-% end
-% 
-% function testThatPackManFetchesRepos(testCase)
-%     % Test specific code
-%     depList        = [
-%         {'PackMan', 'release', 'https://github.com/DanielAtKrypton/PackMan.git', 'PackMan', '', true};
-%         {'DepMat', 'master', 'https://github.com/OmidS/depmat.git', 'depmat', '', true};
-%     ];
-%     depList = cell2struct(depList, {'Name', 'Branch', 'Url', 'FolderName', 'Commit', 'GetLatest'}, 2);    
-% 
-%     pm = prepareTestEnvironmentAndInstall(depList);
-%     
-%     for i=1:length(depList)
-%         depDir = fullfile(pm.depDirPath, depList(i).FolderName);
-%         verifyTrue(testCase, exist(depDir, 'dir')~=false );
-%     end
-%     
-%     depListOnFile = PackMan.loadFromPackageFile( pm.packageFilePath );
-%     
-%     verifyEqual(testCase,length(depList), length(depListOnFile));
-%     for i = 1:length(depList)
-%         rId = find( strcmp( {depListOnFile.Name}, depList(i).Name) );
-%         verifyEqual(testCase, depList(i).Url, depListOnFile(rId).Url);
-%     end
-% end
-% 
-% function testThatPackManCanFetchesSpecificCommits(testCase)
-%     % Test specific code
-%     depList           = [
-%         {'PackMan', 'release', 'https://github.com/DanielAtKrypton/PackMan.git', 'PackMan', '', true};
-%         {'DepMat1', 'master', 'https://github.com/OmidS/depmat.git', 'depmat1', 'f3810b050186a2e1e5e3fbdb64dd7cd8f3bc8528', false};
-%         {'DepMat2', 'master', 'https://github.com/OmidS/depmat.git', 'depmat2', '95fe15dc04406846857e1601f5954a1b4997313b', false};
-%     ];
-%     depList = cell2struct(depList, {'Name', 'Branch', 'Url', 'FolderName', 'Commit', 'GetLatest'}, 2);
-%     
-%     pm = prepareTestEnvironmentAndInstall(depList);
-%     
-%     depDir2 = fullfile(pm.depDirPath, depList(2).FolderName);
-%     depDir3 = fullfile(pm.depDirPath, depList(3).FolderName);
-%     addedFile = 'TestRepoList.m'; % This is a file we expect to exist in commit 2 but not in commit 1
-%     
-%     verifyTrue(testCase, exist( fullfile(depDir2, addedFile) , 'file')==false );
-%     verifyTrue(testCase, exist( fullfile(depDir3, addedFile) , 'file')~=false );
-%     
-%     % Check commit ids in package file
-%     depListOnFile = PackMan.loadFromPackageFile( pm.packageFilePath );
-%     for i = 2:length(depList)
-%         rId = find( strcmp( {depListOnFile.Name}, depList(i).Name) );
-%         verifyEqual(testCase, depListOnFile(rId).Commit, depList(i).Commit );
-%     end
-% end
+function testThatPackManConstructorWorks(testCase)
+    % Test specific code
+    depList        = {'PackMan', 'release', 'https://github.com/DanielAtKrypton/PackMan.git', 'PackMan', '', true};
+    depList = cell2struct(depList, {'Name', 'Branch', 'Url', 'FolderName', 'Commit', 'GetLatest'}, 2);    
+
+    pm = prepareTestEnvironmentAndInstall(depList);
+    verifyEqual(testCase,class(pm),'PackMan');
+end
+
+function testThatPackManRelativePathsWork(testCase)
+    % Test specific code
+    depList        = {'PackMan', 'release', 'https://github.com/DanielAtKrypton/PackMan.git', 'PackMan', '', true};
+    depList = cell2struct(depList, {'Name', 'Branch', 'Url', 'FolderName', 'Commit', 'GetLatest'}, 2);    
+
+    pm = prepareTestEnvironmentAndInstall(depList);
+    currentWorkingDir = pwd;
+    expectedDepDirPath = fullfile(currentWorkingDir, 'source', 'external');
+    verifyEqual(testCase,pm.depDirPath, expectedDepDirPath);
+    
+    expectedPackagePath = fullfile(currentWorkingDir, './package.json');
+    verifyEqual(testCase,pm.packageFilePath, expectedPackagePath);
+end
+ 
+function testThatPackManGeneratesPackageFile(testCase)
+    % Test specific code
+    depList        = [
+        {'PackMan', 'release', 'https://github.com/DanielAtKrypton/PackMan.git', 'PackMan', '', true};
+        {'DepMat', 'master', 'https://github.com/OmidS/depmat.git', 'depmat', '', true};
+    ];
+    depList = cell2struct(depList, {'Name', 'Branch', 'Url', 'FolderName', 'Commit', 'GetLatest'}, 2);    
+    
+    prepareTestEnvironment();
+    pm = installDeps(depList);
+    
+    verifyTrue(testCase, ~exist(pm.packageFilePath, 'file'))
+    
+    pm.install();
+    
+    verifyTrue(testCase, exist(pm.packageFilePath, 'file')~=false );
+end
+
+function testThatPackManFetchesRepos(testCase)
+    % Test specific code
+    depList        = [
+        {'PackMan', 'release', 'https://github.com/DanielAtKrypton/PackMan.git', 'PackMan', '', true};
+        {'DepMat', 'master', 'https://github.com/OmidS/depmat.git', 'depmat', '', true};
+    ];
+    depList = cell2struct(depList, {'Name', 'Branch', 'Url', 'FolderName', 'Commit', 'GetLatest'}, 2);    
+
+    pm = prepareTestEnvironmentAndInstall(depList);
+    
+    for i=1:length(depList)
+        depDir = fullfile(pm.depDirPath, depList(i).FolderName);
+        verifyTrue(testCase, exist(depDir, 'dir')~=false );
+    end
+    
+    depListOnFile = PackMan.loadFromPackageFile( pm.packageFilePath );
+    
+    verifyEqual(testCase,length(depList), length(depListOnFile));
+    for i = 1:length(depList)
+        rId = find( strcmp( {depListOnFile.Name}, depList(i).Name) );
+        verifyEqual(testCase, depList(i).Url, depListOnFile(rId).Url);
+    end
+end
+
+function testThatPackManCanFetchesSpecificCommits(testCase)
+    % Test specific code
+    depList           = [
+        {'PackMan', 'release', 'https://github.com/DanielAtKrypton/PackMan.git', 'PackMan', '', true};
+        {'DepMat1', 'master', 'https://github.com/OmidS/depmat.git', 'depmat1', 'f3810b050186a2e1e5e3fbdb64dd7cd8f3bc8528', false};
+        {'DepMat2', 'master', 'https://github.com/OmidS/depmat.git', 'depmat2', '95fe15dc04406846857e1601f5954a1b4997313b', false};
+    ];
+    depList = cell2struct(depList, {'Name', 'Branch', 'Url', 'FolderName', 'Commit', 'GetLatest'}, 2);
+    
+    pm = prepareTestEnvironmentAndInstall(depList);
+    
+    depDir2 = fullfile(pm.depDirPath, depList(2).FolderName);
+    depDir3 = fullfile(pm.depDirPath, depList(3).FolderName);
+    addedFile = 'TestRepoList.m'; % This is a file we expect to exist in commit 2 but not in commit 1
+    
+    verifyTrue(testCase, exist( fullfile(depDir2, addedFile) , 'file')==false );
+    verifyTrue(testCase, exist( fullfile(depDir3, addedFile) , 'file')~=false );
+    
+    % Check commit ids in package file
+    depListOnFile = PackMan.loadFromPackageFile( pm.packageFilePath );
+    for i = 2:length(depList)
+        rId = find( strcmp( {depListOnFile.Name}, depList(i).Name) );
+        verifyEqual(testCase, depListOnFile(rId).Commit, depList(i).Commit );
+    end
+end
 
 function testThatPackManAutoInstallsOnlyWhenItHasNoOutput(testCase)
     % Test specific code
@@ -132,7 +132,7 @@ function testThatPackManAutoInstallsOnlyWhenItHasNoOutput(testCase)
     installDeps(depList);
     verifyTrue(testCase, exist( packageDir , 'dir')~=false );
 end
-% 
+
 % function testThatPackManRejectsInvalidDepLists(testCase)
 %     % Test specific code
 %     depList           = [
