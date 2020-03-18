@@ -213,7 +213,7 @@ classdef PackMan < handle & matlab.mixin.Copyable
             end
             % Add parent paths of deps
             [depSelfPaths, alreadyAdded, nowAdded ] = obj.getDepSelfPaths( alreadyAdded );
-            paths = [paths, depSelfPaths];
+            paths = [paths; depSelfPaths];
             % Recurse to deps of the added deps
             for di = 1:length(nowAdded)
                 thisDep = nowAdded(di);
