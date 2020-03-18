@@ -147,7 +147,7 @@ classdef PackMan < handle & matlab.mixin.Copyable
                     for j = 1:length(alreadyInstalled)
                         if (isequal(thisDep.Url, alreadyInstalled(j).Url) || ...
                             isequal(strrep(thisDep.Url, '.git', ''), strrep(alreadyInstalled(j).Url, '.git', ''))) && ...
-                           ~isequal(thisDep.Commit, alreadyInstalled(j).Commit)
+                            isequal(thisDep.Commit, alreadyInstalled(j).Commit)
                             conflict = true;
                         end
                     end
