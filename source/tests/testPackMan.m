@@ -73,8 +73,7 @@ end
 %     ];
 %     depList = cell2struct(depList, {'Name', 'Branch', 'Url', 'FolderName', 'Commit', 'GetLatest'}, 2);
 %     
-%     pm = PackMan( depList );
-%     pm.install();
+%     pm = prepareTestEnvironment(depList);
 %     
 %     depDir1 = fullfile(pm.depDirPath, depList(1).FolderName);
 %     depDir2 = fullfile(pm.depDirPath, depList(2).FolderName);

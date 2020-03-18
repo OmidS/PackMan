@@ -10,12 +10,13 @@ sourceFolderPath =fullfile(currentWorkingDir,'source');
 toAddBefore = currentPathList(strcmp(currentPathList, sourceFolderPath));
 if (isempty(toAddBefore))
     addpath(sourceFolderPath);
+    currentPathList = [currentPathList; {sourceFolderPath}];
 end
 if exist(externalFolderPath, 'dir')
     nonGitExternalFolderPaths = genNonGitPath(externalFolderPath);
-    externalFolderPathToRemove = nonGitExternalFolderPaths(isEachMemberASubsetOfAny(currentPathList, nonGitExternalFolderPaths));
-    if (~isempty(externalFolderPathToRemove))
-        rmpath(externalFolderPathToRemove{:});
+    externalFolderPathsToRemove = nonGitExternalFolderPaths(isTheres(currentPathList, nonGitExternalFolderPaths));
+    if (~isempty(externalFolderPathsToRemove))
+        rmpath(externalFolderPathsToRemove{:});
     end
     rmdir(externalFolderPath, 's');
 end
@@ -38,3 +39,9 @@ result = any(cellfun(@(x)isSubset(x, subSet), superSetSet));
 
 function result = isEachMemberASubsetOfAny(superSetSet, subSetSet)
 result = cellfun(@(x)isSubSetOfAny(superSetSet, x), subSetSet);
+
+function result = isThere(setOfElements, element)
+result = ~isempty(setOfElements(strcmp(setOfElements, element)));
+
+function result = isTheres(superSet, subSet)
+result = cellfun(@(x)isThere(superSet, x), subSet);
