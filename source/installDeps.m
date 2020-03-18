@@ -73,7 +73,7 @@ function varargout = installDeps()
     [thisFileDir, ~, ~] = fileparts(thisFilePath);
     depDirPath = fullfile(thisFileDir, depSubDir);
     
-    function installPackMan( depDirPath )
+    function installPackMan( depDirPath, depList )
     % Makes sure DepMat is available and in the path, so that PackMan can
     % install other dependencies
     % Inputs: 
@@ -83,10 +83,11 @@ function varargout = installDeps()
     % Usage example:
     % installPackMan( depDirPath );
     
-    packManDir = fullfile(depDirPath, 'PackMan');
+    packageManagerName = 'PackMan';
+    packManDir = fullfile(depDirPath, packageManagerName);
+    packageManagerDep = depList(strcmp({depList.Name}, packageManagerName));
     try
-        repoUrl = 'https://github.com/DanielAtKrypton/PackMan.git';
-        command = ['git clone --single-branch --branch dev01 ', repoUrl, ' "',packManDir,'"'];
+        command = ['git clone --single-branch --branch ', packageManagerDep.Branch,' ', packageManagerDep.Url, ' "',packManDir,'"'];
         [status, cmdout] = system(command);
         if (~status), fprintf('%s', cmdout); end
     catch
