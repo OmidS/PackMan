@@ -284,7 +284,7 @@ classdef PackMan < handle & matlab.mixin.Copyable
                 if strcmp(subDirPath, obj.depDirPath), continue; end
                 paths = [paths, genNonGitPath(subDirPath)];
             end
-            paths = [paths, obj.parentDir];
+            paths = [{obj.parentDir}; paths];
         end
         
         function pm = createDepPackMan( obj, dep )
