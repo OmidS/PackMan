@@ -237,6 +237,7 @@ classdef PackMan < handle & matlab.mixin.Copyable
                 paths = [paths; depPaths];
             end
             
+            paths = unique(paths);
             if nargout > 1, varargout{1} = alreadyAdded; end
         end
         
