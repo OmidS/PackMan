@@ -21,81 +21,90 @@
 
 function varargout = installDeps()
 
-    % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Directory of dependencies
-    folderName = pwd;  
-    paths = genpath(folderName);            
-    pathList = split(paths, ';');
-    pathList = rmmissing(pathList);
-    nonGitPaths = pathList(~contains(pathList, '\.git'));
-    
-    if (all(cellfun(@exist, nonGitPaths)== 7))
-        addpath(nonGitPaths{:});
-        s = which('installDeps.m', '-ALL');
-        if length(s) >= 1
-            installDepsPath = s{1};
-            dpDirPth = fileparts(installDepsPath);
-            getDepListFunction = fullfile(dpDirPth, 'getDepList.m');
-            run(getDepListFunction);
-            depList = ans;
-            
-            depSubDir = fullfile(fileparts(installDepsPath),'external');
-            installPackMan( depSubDir, depList );
-        end
-    else    
-        depSubDir = fullfile('.', 'external');
-        depSubDir = getDepDirPath( depSubDir );
-        installPackMan( depSubDir );
-    end
-    
-    % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    % Get the list of dependencies
-    if isempty(depList)
-        depList = getDepList();
-    end
-    
-    pm = PackMan(depList, depSubDir); % Install other dependencies
-    
-    if nargout < 1
-        pm.install();
-    else
-        varargout{1} = pm;
-    end
-    
-    function depDirPath = getDepDirPath( depSubDir )
-    % Generates path to dependency directory based on the path of the current
-    % file
-    % Inputs: 
-    % (1) depSubDir: relative path of the dependency directory
-    % Outputs:
-    % (1) full path of the dependency subdir
-    
-    thisFilePath = mfilename('fullpath');
-    [thisFileDir, ~, ~] = fileparts(thisFilePath);
-    depDirPath = fullfile(thisFileDir, depSubDir);
-    
-    function installPackMan( depDirPath, depList )
-    % Makes sure DepMat is available and in the path, so that PackMan can
-    % install other dependencies
-    % Inputs: 
-    % (1) depDirPath: path to dependency directory
-    % Outputs: 
-    % (none)
-    % Usage example:
-    % installPackMan( depDirPath );
-    
-    packageManagerName = 'PackMan';
-    packManDir = fullfile(depDirPath, packageManagerName);
-    packageManagerDep = depList(strcmp({depList.Name}, packageManagerName));
-    try
-%         Name, Branch, Url, FolderName, Commit, GetLatest
-        command = ['git clone --single-branch --branch ', packageManagerDep.Branch,' ', packageManagerDep.Url, ' "',packManDir,'"'];
-        [status, cmdout] = system(command);
-        if (~status), fprintf('%s', cmdout); end
-    catch
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Directory of dependencies
+folderName = pwd;  
+nonGitPaths = genNonGitPath(folderName);
+
+if (all(cellfun(@exist, nonGitPaths)== 7))
+    addpath(nonGitPaths{:});
+    s = which('installDeps.m', '-ALL');
+    if length(s) >= 1
+        installDepsPath = s{1};
+        dpDirPth = fileparts(installDepsPath);
+        getDepListFunction = fullfile(dpDirPth, 'getDepList.m');
+        run(getDepListFunction);
+        depList = ans;
         
+        depSubDir = fullfile(fileparts(installDepsPath),'external');
+        installPackMan( depSubDir, depList );
     end
+else    
+    depSubDir = fullfile('.', 'external');
+    depSubDir = getDepDirPath( depSubDir );
+    installPackMan( depSubDir );
+end
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Get the list of dependencies
+if isempty(depList)
+    depList = getDepList();
+end
+
+pm = PackMan(depList, depSubDir); % Install other dependencies
+
+if nargout < 1
+    pm.install();
+else
+    varargout{1} = pm;
+end
+
+function depDirPath = getDepDirPath( depSubDir )
+% Generates path to dependency directory based on the path of the current
+% file
+% Inputs: 
+% (1) depSubDir: relative path of the dependency directory
+% Outputs:
+% (1) full path of the dependency subdir
+
+thisFilePath = mfilename('fullpath');
+[thisFileDir, ~, ~] = fileparts(thisFilePath);
+depDirPath = fullfile(thisFileDir, depSubDir);
+
+function installPackMan( depDirPath, depList )
+% Makes sure DepMat is available and in the path, so that PackMan can
+% install other dependencies
+% Inputs: 
+% (1) depDirPath: path to dependency directory
+% Outputs: 
+% (none)
+% Usage example:
+% installPackMan( depDirPath );
+
+packageManagerName = 'PackMan';
+packManDir = fullfile(depDirPath, packageManagerName);
+packageManagerDep = depList(strcmp({depList.Name}, packageManagerName));
+try
+%         Name, Branch, Url, FolderName, Commit, GetLatest
+    command = ['git clone --single-branch --branch ', packageManagerDep.Branch,' ', packageManagerDep.Url, ' "',packManDir,'"'];
+    [status, cmdout] = system(command);
+    if (~status), fprintf('%s', cmdout); end
+catch
     
-    packManSourceDir = fullfile(packManDir,'source');
+end
+
+packManSourceDir = fullfile(packManDir,'source');
+packManPath = genNonGitPath(packManSourceDir);
+addpath(packManPath{:});
+
+function pathList = genNonGitPath(folderName)
+%genPath - Description
+%
+% Syntax: output = genPath(input)
+%
+% Long description
     
-    addpath(genpath(packManSourceDir));
+paths = genpath(folderName);            
+pathList = split(paths, ';');
+pathList = rmmissing(pathList);
+pathList = pathList(~contains(pathList, '\.git'));
