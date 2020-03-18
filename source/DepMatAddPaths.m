@@ -32,7 +32,7 @@ function DepMatAddPaths(baseFolderList, repoNameList, forceUpdate)
             DepMat_PathsHaveBeenSet{end + 1} = repoName;
         end
         if doAddPaths
-            repoPaths = genpath(baseFolderList{repoIndex});
+            repoPaths = genNonGitPath(baseFolderList{repoIndex});
             allPathsToAdd = [allPathsToAdd, repoPaths];
         end
         
