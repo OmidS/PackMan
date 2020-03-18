@@ -88,6 +88,7 @@ function varargout = installDeps()
     packManDir = fullfile(depDirPath, packageManagerName);
     packageManagerDep = depList(strcmp({depList.Name}, packageManagerName));
     try
+%         Name, Branch, Url, FolderName, Commit, GetLatest
         command = ['git clone --single-branch --branch ', packageManagerDep.Branch,' ', packageManagerDep.Url, ' "',packManDir,'"'];
         [status, cmdout] = system(command);
         if (~status), fprintf('%s', cmdout); end
