@@ -309,9 +309,7 @@ classdef PackMan < handle & matlab.mixin.Copyable
             
             if (~strcmp(dep.Name,'PackMan'))
                 generatedPath = pm.genPath;
-                generatedPathWithoutLastSemicolon = generatedPath(1:end-1);
-                genPaths = split(generatedPathWithoutLastSemicolon, ';');
-                if (all(cellfun(@exist, genPaths)== 7))
+                if (all(cellfun(@exist, generatedPath)== 7))
                     oldPath = path;
                     addpath(generatedPath{:});
                     s = which('installDeps.m', '-ALL');

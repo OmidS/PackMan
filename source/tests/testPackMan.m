@@ -145,12 +145,35 @@ end
 %     verifyError(testCase, @()( installDeps(depList) ), 'PackMan:DepListError' );
 % end
 
-function testThatPackManReturnsDepPaths(testCase)
+% function testThatPackManReturnsDepPaths(testCase)
+%     % Test specific code
+%     depList        = [
+%         {'PackMan', 'release', 'https://github.com/DanielAtKrypton/PackMan.git', 'PackMan', '', true};    
+%         {'DepMat', 'master', 'https://github.com/OmidS/depmat.git', 'depmat', '', true};
+%     ];
+%     depList = cell2struct(depList, {'Name', 'Branch', 'Url', 'FolderName', 'Commit', 'GetLatest'}, 2);
+%     pm = prepareTestEnvironmentAndInstall(depList);
+%     paths = pm.genPath();
+%     expectedPaths = [
+%         {pm.parentDir                                                       }
+%         {fullfile(pm.parentDir, 'source')                                   }
+%         {fullfile(pm.parentDir, 'source', 'external')                       }
+%         {fullfile(pm.parentDir, 'source', 'external', 'PackMan')            }
+%         {fullfile(pm.parentDir, 'source', 'external', 'PackMan', 'source')  }
+%         {fullfile(pm.parentDir, 'source', 'external', 'depmat')             }
+%         {fullfile(pm.parentDir, 'source', 'external', 'depmat', 'tests')    }
+%         {fullfile(pm.parentDir, 'source', 'tests')                          }
+%     ];
+%     verifyEqual(testCase, paths, expectedPaths);
+% end
+% 
+function testThatPackManRecursiveWorks(testCase)
     % Test specific code
     depList        = [
-        {'PackMan', 'release', 'https://github.com/DanielAtKrypton/PackMan.git', 'PackMan', '', true};    
-        {'DepMat', 'master', 'https://github.com/OmidS/depmat.git', 'depmat', '', true};
+        {'PackMan', 'release', 'https://github.com/DanielAtKrypton/PackMan.git', 'PackMan', '', true};        
+        {'matlabPackManRecursiveSample', 'master', 'https://github.com/OmidS/matlabPackManRecursiveSample.git', 'matlabPackManRecursiveSample', '', true};
     ];
+        
     depList = cell2struct(depList, {'Name', 'Branch', 'Url', 'FolderName', 'Commit', 'GetLatest'}, 2);
     pm = prepareTestEnvironmentAndInstall(depList);
     paths = pm.genPath();
@@ -160,29 +183,23 @@ function testThatPackManReturnsDepPaths(testCase)
         {fullfile(pm.parentDir, 'source', 'external')                       }
         {fullfile(pm.parentDir, 'source', 'external', 'PackMan')            }
         {fullfile(pm.parentDir, 'source', 'external', 'PackMan', 'source')  }
-        {fullfile(pm.parentDir, 'source', 'external', 'depmat')             }
-        {fullfile(pm.parentDir, 'source', 'external', 'depmat', 'tests')    }
-        {fullfile(pm.parentDir, 'source', 'tests')                          }
-    ];
+        {fullfile(pm.parentDir, 'source', 'external', 'matlabPackManRecursiveSample')             }
+        {fullfile(pm.parentDir, 'source', 'external', 'matlabPackManRecursiveSample', 'external')    }
+        {fullfile(pm.parentDir, 'source', 'external', 'matlabPackManRecursiveSample', 'external', 'PackMan')    }
+        {fullfile(pm.parentDir, 'source', 'external', 'matlabPackManRecursiveSample', 'external', 'PackManRecursiveSample')    }
+        {fullfile(pm.parentDir, 'source', 'external', 'matlabPackManRecursiveSample', 'external', 'PackMan', 'source')    }
+        {fullfile(pm.parentDir, 'source', 'external', 'matlabPackManRecursiveSample', 'external', 'PackMan', 'source', 'tests')    }
+        {fullfile(pm.parentDir, 'source', 'tests')                          }        
+    ];    
+    expectedPaths = [fullfile(pm.parentDir, './external/matlabPackManRecursiveSample/external/depmat/tests'),';', ...
+                     fullfile(pm.parentDir, './external/matlabPackManRecursiveSample/external/depmat'),';', ...
+                     fullfile(pm.parentDir, './external/matlabPackManRecursiveSample/external/matlabPackManSample/external/depmat/tests'),';', ...
+                     fullfile(pm.parentDir, './external/matlabPackManRecursiveSample/external/matlabPackManSample/external/depmat'),';', ...
+                     fullfile(pm.parentDir, './external/matlabPackManRecursiveSample/external/matlabPackManSample'),';', ...
+                     fullfile(pm.parentDir, './external/matlabPackManRecursiveSample'),';', ...
+                     pm.parentDir,';'];
     verifyEqual(testCase, paths, expectedPaths);
 end
-% 
-% function testThatPackManRecursiveWorks(testCase)
-%     % Test specific code
-%     depList        = {'matlabPackManRecursiveSample', 'master', 'https://github.com/OmidS/matlabPackManRecursiveSample.git', 'matlabPackManRecursiveSample', '', true};
-%     depList = cell2struct(depList, {'Name', 'Branch', 'Url', 'FolderName', 'Commit', 'GetLatest'}, 2);
-%     pm = PackMan( depList );
-%     pm.install();
-%     paths = pm.genPath();
-%     expectedPaths = [fullfile(pm.parentDir, './external/matlabPackManRecursiveSample/external/depmat/tests'),';', ...
-%                      fullfile(pm.parentDir, './external/matlabPackManRecursiveSample/external/depmat'),';', ...
-%                      fullfile(pm.parentDir, './external/matlabPackManRecursiveSample/external/matlabPackManSample/external/depmat/tests'),';', ...
-%                      fullfile(pm.parentDir, './external/matlabPackManRecursiveSample/external/matlabPackManSample/external/depmat'),';', ...
-%                      fullfile(pm.parentDir, './external/matlabPackManRecursiveSample/external/matlabPackManSample'),';', ...
-%                      fullfile(pm.parentDir, './external/matlabPackManRecursiveSample'),';', ...
-%                      pm.parentDir,';'];
-%     verifyEqual(testCase, paths, expectedPaths);
-% end
 % 
 % %% Helper functions
 % function [depDir, packageFile] = getPaths()
