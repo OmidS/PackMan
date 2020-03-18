@@ -44,16 +44,17 @@ end
 function testThatPackManFetchesRepos(testCase)
     % Test specific code
     depList        = [
-        {'PackMan', 'dev01', 'https://github.com/DanielAtKrypton/PackMan.git', 'PackMan', '', true};
+        {'PackMan', 'release', 'https://github.com/DanielAtKrypton/PackMan.git', 'PackMan', '', true};
         {'DepMat', 'master', 'https://github.com/OmidS/depmat.git', 'depmat', '', true};
     ];
     depList = cell2struct(depList, {'Name', 'Branch', 'Url', 'FolderName', 'Commit', 'GetLatest'}, 2);    
 
-    pm = installDeps(depList);
-    pm.install();
+    pm = prepareTestEnvironment(depList);
     
-    depDir = fullfile(pm.depDirPath, depList.FolderName);
-    verifyTrue(testCase, exist(depDir, 'dir')~=false );
+    for i=1:length(depList)
+        depDir = fullfile(pm.depDirPath, depList(i).FolderName);
+        verifyTrue(testCase, exist(depDir, 'dir')~=false );
+    end
     
     depListOnFile = PackMan.loadFromPackageFile( pm.packageFilePath );
     
