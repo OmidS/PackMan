@@ -238,6 +238,7 @@ classdef PackMan < handle & matlab.mixin.Copyable
             end
             
             paths = unique(paths);
+            paths = paths(~endsWith(paths, '\private')); % Private directories not allowed in MATLAB path.
             if nargout > 1, varargout{1} = alreadyAdded; end
         end
         
