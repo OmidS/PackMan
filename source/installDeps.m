@@ -34,12 +34,13 @@ function varargout = installDeps()
         s = which('installDeps.m', '-ALL');
         if length(s) >= 1
             installDepsPath = s{1};
-            depSubDir = fullfile(fileparts(installDepsPath),'external');
-            installPackMan( depSubDir );
             dpDirPth = fileparts(installDepsPath);
             getDepListFunction = fullfile(dpDirPth, 'getDepList.m');
             run(getDepListFunction);
             depList = ans;
+            
+            depSubDir = fullfile(fileparts(installDepsPath),'external');
+            installPackMan( depSubDir, depList );
         end
     else    
         depSubDir = fullfile('.', 'external');
