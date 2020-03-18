@@ -319,7 +319,6 @@ classdef PackMan < handle & matlab.mixin.Copyable
                         dpDirPth = fileparts(strrep(installDepsPath,depDir,''));
                         getDepListFunction = fullfile(depDir, dpDirPth, 'getDepList.m');
                         run(getDepListFunction);
-                        structureArray = ans;
                         pm = PackMan(ans, fullfile(fileparts(installDepsPath),'external') , '', depDir);
                     end
                     path(oldPath);
