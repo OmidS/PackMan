@@ -30,7 +30,21 @@ classdef PackMan < handle & matlab.mixin.Copyable
             if nargin < 4 || isempty(parDir), parDir = pwd; end
             obj.parentDir = parDir;
             
-            if nargin < 1 || isempty(depList), depList = DepMat.empty; end
+            if nargin < 1 || isempty(depList)
+                depList = DepMat.empty; 
+            else                
+                depListLenght = length(depList);
+                f_names = fieldnames(depList);
+                f_namesLength = length(f_names);
+                
+                constructorParams = cell(depListLenght, f_namesLength);
+                depObjList = repmat(DepMatRepo(),1,depListLenght);
+                for i = 1:depListLenght
+                    constructorParams(:, i) = cellfun(@(x)(depList(i).(x)),f_names,'UniformOutput',false);
+                    depObjList(i) = DepMatRepo(constructorParams{:,i});
+                end                
+                depList = depObjList;
+            end
             if nargin < 2 || isempty(depDirPath), depDirPath = fullfile(obj.parentDir, '/external'); end
             if nargin < 3 || isempty(packageFilePath)
                 if exist('jsonencode', 'builtin')
@@ -305,6 +319,7 @@ classdef PackMan < handle & matlab.mixin.Copyable
                         dpDirPth = fileparts(strrep(installDepsPath,depDir,''));
                         getDepListFunction = fullfile(depDir, dpDirPth, 'getDepList.m');
                         run(getDepListFunction);
+                        structureArray = ans;
                         pm = PackMan(ans, fullfile(fileparts(installDepsPath),'external') , '', depDir);
                     end
                     path(oldPath);
