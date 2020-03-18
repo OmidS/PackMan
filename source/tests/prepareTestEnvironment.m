@@ -25,20 +25,11 @@ if exist(packageFile, 'file')
     delete(packageFile);
 end
 nonGitPath = genNonGitPath(currentWorkingDir);
-toRemoveLater = nonGitPath(isEachMemberASubsetOfAny(currentPathList, nonGitPath));
+toRemoveLater = nonGitPath(isTheres(currentPathList, nonGitPath));
 toRemoveLater = toRemoveLater(~strcmp(toRemoveLater, fullfile(currentWorkingDir,'source','tests')));
 pm = installDeps(depList);
 pm.install();
 rmpath(toRemoveLater{:});
-
-function result = isSubset(superSet, subSet)
-result = isempty(setdiff(subSet, superSet));
-
-function result = isSubSetOfAny(superSetSet, subSet)
-result = any(cellfun(@(x)isSubset(x, subSet), superSetSet));
-
-function result = isEachMemberASubsetOfAny(superSetSet, subSetSet)
-result = cellfun(@(x)isSubSetOfAny(superSetSet, x), subSetSet);
 
 function result = isThere(setOfElements, element)
 result = ~isempty(setOfElements(strcmp(setOfElements, element)));
