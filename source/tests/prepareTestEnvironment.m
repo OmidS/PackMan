@@ -1,4 +1,4 @@
-function pm = prepareTestEnvironment(depList)
+function toRemoveLater = prepareTestEnvironment()
 %PREPARETESTENVIRONMENT Summary of this function goes here
 %   Detailed explanation goes here
 currentWorkingDir = pwd;
@@ -27,9 +27,6 @@ end
 nonGitPath = genNonGitPath(currentWorkingDir);
 toRemoveLater = nonGitPath(isTheres(currentPathList, nonGitPath));
 toRemoveLater = toRemoveLater(~strcmp(toRemoveLater, fullfile(currentWorkingDir,'source','tests')));
-pm = installDeps(depList);
-pm.install();
-rmpath(toRemoveLater{:});
 
 function result = isThere(setOfElements, element)
 result = ~isempty(setOfElements(strcmp(setOfElements, element)));
