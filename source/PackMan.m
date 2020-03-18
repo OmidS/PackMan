@@ -297,7 +297,7 @@ classdef PackMan < handle & matlab.mixin.Copyable
                 genPaths = split(generatedPathWithoutLastSemicolon, ';');
                 if (all(cellfun(@exist, genPaths)== 7))
                     oldPath = path;
-                    addpath(generatedPath);
+                    addpath(generatedPath{:});
                     s = which('installDeps.m', '-ALL');
                     pathIndexesContainintDepDir = contains(s, depDir);
                     if any(pathIndexesContainintDepDir)
