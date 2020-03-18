@@ -209,7 +209,7 @@ classdef PackMan < handle & matlab.mixin.Copyable
             paths = {};
             if selfPaths
                 % Add subpaths of this package
-                paths = [paths, obj.getSelfPaths()];
+                paths = [paths; obj.getSelfPaths()];
             end
             % Add parent paths of deps
             [depSelfPaths, alreadyAdded, nowAdded ] = obj.getDepSelfPaths( alreadyAdded );
@@ -219,7 +219,7 @@ classdef PackMan < handle & matlab.mixin.Copyable
                 thisDep = nowAdded(di);
                 pm = obj.createDepPackMan( thisDep );
                 [depPaths, alreadyAdded] = pm.genPath( alreadyAdded, false );
-                paths = [paths, depPaths];
+                paths = [paths; depPaths];
             end
             
             if nargout > 1, varargout{1} = alreadyAdded; end
@@ -263,7 +263,7 @@ classdef PackMan < handle & matlab.mixin.Copyable
                         alreadyAdded = cat(1, alreadyAdded, thisDep);
                         nowAdded = cat(1, nowAdded, thisDep);
                         depPaths = pm.getSelfPaths();
-                        paths = [paths, depPaths];
+                        paths = [paths; depPaths];
                     else
                         warning('PackMan:genpath:versionConflict', 'Two different versions of %s were listed as dependencies! Aborted adding of the following version  to the path:  (%s, located in "%s")!\n', thisDep.Url, thisDep.getVersionStr(), pm.parentDir);
                     end
@@ -282,7 +282,7 @@ classdef PackMan < handle & matlab.mixin.Copyable
             for fi = 1:length(files)
                 subDirPath = fullfile(files(fi).folder, files(fi).name);
                 if strcmp(subDirPath, obj.depDirPath), continue; end
-                paths = [paths, genNonGitPath(subDirPath)];
+                paths = [paths; genNonGitPath(subDirPath)];
             end
             paths = [{obj.parentDir}; paths];
         end
