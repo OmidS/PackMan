@@ -23,11 +23,15 @@ function varargout = installDeps()
 
     % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     % Directory of dependencies
-    currentDirectory = pwd;
-    nonGitPaths = genNonGitPath(currentDirectory);
+    folderName = pwd;  
+    paths = genpath(folderName);            
+    pathList = split(paths, ';');
+    pathList = rmmissing(pathList);
+    nonGitPaths = pathList(~contains(pathList, '\.git'));
+    
     oldPath = path;
     if (all(cellfun(@exist, nonGitPaths)== 7))
-        addpath(generatedPath);
+        addpath(nonGitPaths{:});
         s = which('installDeps.m', '-ALL');
         if length(s) >= 1
             installDepsPath = s{1};
@@ -94,5 +98,4 @@ function varargout = installDeps()
     
     packManSourceDir = fullfile(packManDir,'source');
     
-    nonGitPaths = genNonGitPath(packManSourceDir);
-    addpath(nonGitPaths{:});
+    addpath(genpath(packManSourceDir));
