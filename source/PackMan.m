@@ -203,7 +203,7 @@ classdef PackMan < handle & matlab.mixin.Copyable
             %   pm.install(); 
             %   paths = pm.genPath(); 
             %   addpath(paths); 
-            if nargin < 2, alreadyAdded = []; end
+            if nargin < 2, alreadyAdded = {}; end
             if nargin < 3, selfPaths = true; end
             
             paths = {};
@@ -240,9 +240,9 @@ classdef PackMan < handle & matlab.mixin.Copyable
             % Usage sample: 
             %   pm.getDepSelfPaths(); 
 
-            if nargin < 2, alreadyAdded = []; end
+            if nargin < 2, alreadyAdded = {}; end
             
-            nowAdded = [];
+            nowAdded = {};
             paths = {};
             for di = 1:length( obj.depList )
                 thisDep = obj.depList(di);

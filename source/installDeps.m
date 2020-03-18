@@ -12,7 +12,7 @@
 %               used to manually install deps by calling:
 %                   pm.install(); 
 %               It can also be used for adding dep paths to path by calling
-%                   addpath(pm.genPath())
+%                   addpath(pm.genPath{:})
 % 
 %   Usage example:
 %       % Modify getDepList.m to return the list of all dependencies.
