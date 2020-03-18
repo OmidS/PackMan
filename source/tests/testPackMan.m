@@ -133,16 +133,18 @@ function testThatPackManAutoInstallsOnlyWhenItHasNoOutput(testCase)
     verifyTrue(testCase, exist( packageDir , 'dir')~=false );
 end
 
-% function testThatPackManRejectsInvalidDepLists(testCase)
-%     % Test specific code
-%     depList           = [
-%         {'DepMat', 'master', 'https://github.com/OmidS/depmat.git', 'depmat1', 'f3810b050186a2e1e5e3fbdb64dd7cd8f3bc8528', false};
-%         {'DepMat', 'master', 'https://github.com/OmidS/depmat.git', 'depmat2', '95fe15dc04406846857e1601f5954a1b4997313b', false};
-%     ];
-%     depList = cell2struct(depList, {'Name', 'Branch', 'Url', 'FolderName', 'Commit', 'GetLatest'}, 2);
-%     verifyError(testCase, @()( PackMan(depList) ), 'PackMan:DepListError' );
-% end
-% 
+function testThatPackManRejectsInvalidDepLists(testCase)
+    % Test specific code
+    depList           = [
+        {'PackMan', 'release', 'https://github.com/DanielAtKrypton/PackMan.git', 'PackMan', '', true};
+        {'DepMat', 'master', 'https://github.com/OmidS/depmat.git', 'depmat1', 'f3810b050186a2e1e5e3fbdb64dd7cd8f3bc8528', false};
+        {'DepMat', 'master', 'https://github.com/OmidS/depmat.git', 'depmat2', '95fe15dc04406846857e1601f5954a1b4997313b', false};
+    ];
+    depList = cell2struct(depList, {'Name', 'Branch', 'Url', 'FolderName', 'Commit', 'GetLatest'}, 2);
+    prepareTestEnvironment();
+    verifyError(testCase, @()( installDeps(depList) ), 'PackMan:DepListError' );
+end
+
 % function testThatPackManReturnsDepPaths(testCase)
 %     % Test specific code
 %     depList        = {'DepMat', 'master', 'https://github.com/OmidS/depmat.git', 'depmat', '', true};
