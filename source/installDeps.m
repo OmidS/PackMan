@@ -29,7 +29,6 @@ function varargout = installDeps()
     pathList = rmmissing(pathList);
     nonGitPaths = pathList(~contains(pathList, '\.git'));
     
-    oldPath = path;
     if (all(cellfun(@exist, nonGitPaths)== 7))
         addpath(nonGitPaths{:});
         s = which('installDeps.m', '-ALL');
@@ -61,8 +60,6 @@ function varargout = installDeps()
     else
         varargout{1} = pm;
     end
-    
-    path(oldPath);
     
     function depDirPath = getDepDirPath( depSubDir )
     % Generates path to dependency directory based on the path of the current
