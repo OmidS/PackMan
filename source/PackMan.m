@@ -206,7 +206,7 @@ classdef PackMan < handle & matlab.mixin.Copyable
             if nargin < 2, alreadyAdded = []; end
             if nargin < 3, selfPaths = true; end
             
-            paths = [];
+            paths = {};
             if selfPaths
                 % Add subpaths of this package
                 paths = [paths, obj.getSelfPaths()];
@@ -243,7 +243,7 @@ classdef PackMan < handle & matlab.mixin.Copyable
             if nargin < 2, alreadyAdded = []; end
             
             nowAdded = [];
-            paths = '';
+            paths = {};
             for di = 1:length( obj.depList )
                 thisDep = obj.depList(di);
                 % obj.dispHandler(sprintf('Considering dep %s (%s)', thisDep.Name, thisDep.Commit));
@@ -274,7 +274,7 @@ classdef PackMan < handle & matlab.mixin.Copyable
         end
         
         function paths = getSelfPaths(obj)
-            paths = [];
+            paths = {};
             % Add subpaths of this package
             files = dir(obj.parentDir);
             files(~[files.isdir]) = [];
@@ -282,9 +282,9 @@ classdef PackMan < handle & matlab.mixin.Copyable
             for fi = 1:length(files)
                 subDirPath = fullfile(files(fi).folder, files(fi).name);
                 if strcmp(subDirPath, obj.depDirPath), continue; end
-                paths = [paths, genpath(subDirPath)];
+                paths = [paths, genNonGitPath(subDirPath)];
             end
-            paths = [paths, obj.parentDir, ';'];
+            paths = [paths, obj.parentDir];
         end
         
         function pm = createDepPackMan( obj, dep )
