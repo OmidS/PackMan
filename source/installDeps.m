@@ -19,10 +19,9 @@
 %       % Then simply call this any time you want to install/update:
 %       installDeps
 
-function varargout = installDeps()
-
+function varargout = installDeps(varargin)
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Directory of dependencies
+% Get the list of dependencies
 folderName = pwd;  
 nonGitPaths = genNonGitPath(folderName);
 
@@ -35,20 +34,23 @@ if (all(cellfun(@exist, nonGitPaths)== 7))
         getDepListFunction = fullfile(dpDirPth, 'getDepList.m');
         run(getDepListFunction);
         depList = ans;
-        
+
         depSubDir = fullfile(fileparts(installDepsPath),'external');
+        
+        if nargin ~= 0
+            depList = varargin{1};
+        end
+        
         installPackMan( depSubDir, depList );
     end
-else    
-    depSubDir = fullfile('.', 'external');
-    depSubDir = getDepDirPath( depSubDir );
-    installPackMan( depSubDir );
+else
+    error('Unexistent path found!');
 end
 
-% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Get the list of dependencies
-if isempty(depList)
-    depList = getDepList();
+if nargin ~= 0
+    depList = varargin{1};
+else
+
 end
 
 pm = PackMan(depList, depSubDir); % Install other dependencies

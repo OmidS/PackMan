@@ -37,7 +37,7 @@ classdef PackMan < handle & matlab.mixin.Copyable
                 f_names = fieldnames(depList);
                 f_namesLength = length(f_names);
                 
-                constructorParams = cell(depListLenght, f_namesLength);
+                constructorParams = cell(f_namesLength, depListLenght);
                 depObjList = repmat(DepMatRepo(),1,depListLenght);
                 for i = 1:depListLenght
                     constructorParams(:, i) = cellfun(@(x)(depList(i).(x)),f_names,'UniformOutput',false);
