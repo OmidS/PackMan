@@ -86,7 +86,7 @@ function varargout = installDeps()
     packManDir = fullfile(depDirPath, 'PackMan');
     try
         repoUrl = 'https://github.com/DanielAtKrypton/PackMan.git';
-        command = ['git clone ', repoUrl, ' "',packManDir,'"'];
+        command = ['git clone --single-branch --branch dev01', repoUrl, ' "',packManDir,'"'];
         [status, cmdout] = system(command);
         if (~status), fprintf('%s', cmdout); end
     catch
