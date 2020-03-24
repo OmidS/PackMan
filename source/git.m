@@ -23,7 +23,7 @@ function result = git(varargin)
             ME = MException('Git:couldntExecuteGitCommand', ...
             'git command %s resulted in a failure!', commandString);
             throw(ME);   
-        end
+        end        
         return;
     end
     name = getRepoName();
@@ -31,7 +31,7 @@ function result = git(varargin)
     fid = fopen(filename , 'wt' );
     fclose(fid);
     
-    [status, ~] = dos([which('RunCommand.cmd') ' ' name ' ' commandString ' &']);
+    [status, ~] = dos([which('RunCommand.bat') ' ' name ' ' commandString ' &']);
     if status
         ME = MException('Git:couldntExecuteGitCommand', ...
         'git command %s resulted in failure!', commandString);
@@ -40,11 +40,10 @@ function result = git(varargin)
     v = ver;
     isRoboticsToolboxAvailable = any(strcmp('Robotics System Toolbox', {v.Name}));
     desiredRate = 5;
-    isRoboticsToolboxAvailable = false;
     if (isRoboticsToolboxAvailable)
         r = robotics.Rate(desiredRate);
         reset(r);
-    end
+    end        
     while(true)
         fid = fopen(filename, 'rt' );
         contents = textscan(fid,'%s','Delimiter','\n');
@@ -76,6 +75,6 @@ function result = git(varargin)
         ME = MException('Git:couldntExecuteGitCommand', ...
         'git command %s resulted in failure!', commandString);
         throw(ME);  
-    end
+    end    
     result = result(1:end-1); % remove newline.
     [~,name,~] = fileparts(result);
