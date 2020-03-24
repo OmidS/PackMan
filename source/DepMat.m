@@ -91,8 +91,12 @@ classdef DepMat
         end
 
         function installed = isGitInstalled
-            failure = git('--help');
-            installed = ~failure;
+            installed = true;
+            try
+                git('--help');
+            catch
+                installed = false;
+            end
         end
         
         function fixCurlPath

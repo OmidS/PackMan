@@ -5,7 +5,6 @@ SET cmdToRun=%ALL_BUT_FIRST%
 
 echo Executing git command on %~1 repository: %cmdToRun%
 
-for /f %%i in ('%cmdToRun%') do set result=%%i
-@echo %result% > %~1CommandOutput
+(%cmdToRun%) > %~1CommandOutput
 
 exit

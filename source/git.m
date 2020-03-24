@@ -1,4 +1,4 @@
-function [status, result] = git(varargin)
+function result = git(varargin)
     %GIT Summary of this function goes here
     %   Detailed explanation goes here
     if (nargin == 0)
@@ -19,6 +19,11 @@ function [status, result] = git(varargin)
     case 'push'
     otherwise
         [status, result] = system(commandString);
+        if status
+            ME = MException('Git:couldntExecuteGitCommand', ...
+            'git command %s resulted in a failure!', commandString);
+            throw(ME);   
+        end
         return;
     end
     name = getRepoName();
@@ -26,20 +31,43 @@ function [status, result] = git(varargin)
     fid = fopen(filename , 'wt' );
     fclose(fid);
     
-    [status, ~] = dos([which('RunCommand.bat') ' ' name ' ' commandString ' &']);
+    [status, ~] = dos([which('RunCommand.cmd') ' ' name ' ' commandString ' &']);
+    if status
+        ME = MException('Git:couldntExecuteGitCommand', ...
+        'git command %s resulted in failure!', commandString);
+        throw(ME);  
+    end
+    v = ver;
+    isRoboticsToolboxAvailable = any(strcmp('Robotics System Toolbox', {v.Name}));
+    desiredRate = 10;
+    if (isRoboticsToolboxAvailable)
+        r = robotics.Rate(desiredRate);
+        reset(r);
+    end
     while(true)
         fid = fopen(filename, 'rt' );
-        contents = fscanf(fid, '%s\n');
+        contents = textscan(fid,'%s','Delimiter','\n');
+        contents = contents{1};
         fclose(fid);
         if ~isempty(contents)
             delete(filename)
             break;
         end
-        pause(0.2);
+        if (isRoboticsToolboxAvailable)
+            waitfor(r);
+        else
+            pause(1/desiredRate);
+        end
     end
     result = contents;
     
     function name = getRepoName()
-    [~, result] = system('git rev-parse --show-toplevel');
+    commandString = 'git rev-parse --show-toplevel';
+    [status, result] = system(commandString);
+    if status
+        ME = MException('Git:couldntExecuteGitCommand', ...
+        'git command %s resulted in failure!', commandString);
+        throw(ME);  
+    end
     result = result(1:end-1); % remove newline.
     [~,name,~] = fileparts(result);
