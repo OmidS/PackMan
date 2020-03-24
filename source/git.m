@@ -50,7 +50,7 @@ function result = git(varargin)
         contents = contents{1};
         fclose(fid);
         if ~isempty(contents)
-            while(true)
+            while(exist(filename, 'file'))
                 try
                     delete(filename);
                     break;
