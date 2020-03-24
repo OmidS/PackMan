@@ -1,4 +1,4 @@
-function result = git(varargin)
+function varargout = git(varargin)
     %GIT Summary of this function goes here
     %   Detailed explanation goes here
     if (nargin == 0)
@@ -23,7 +23,13 @@ function result = git(varargin)
             ME = MException('Git:couldntExecuteGitCommand', ...
             'git command %s resulted in a failure!', commandString);
             throw(ME);   
-        end        
+        end
+        switch(nargout)
+            case 0
+                disp(result);
+            otherwise
+                varargout{1} = result;
+        end
         return;
     end
     name = getRepoName();
@@ -60,6 +66,12 @@ function result = git(varargin)
         end
     end
     result = contents;
+    switch(nargout)
+        case 0
+            disp(result);
+        otherwise
+            varargout{1} = result;
+    end    
     
     function name = getRepoName()
     commandString = 'git rev-parse --show-toplevel';
