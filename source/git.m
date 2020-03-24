@@ -19,6 +19,11 @@ function [status, result] = git(varargin)
     case 'push'
     otherwise
         [status, result] = system(commandString);
+        if status
+            ME = MException('Git:couldntExecuteGitCommand', ...
+            'git command %s resulted in a failure!', commandString);
+            throw(ME);   
+        end        
         return;
     end
     name = getRepoName();
@@ -27,6 +32,18 @@ function [status, result] = git(varargin)
     fclose(fid);
     
     [status, ~] = dos([which('RunCommand.bat') ' ' name ' ' commandString ' &']);
+    if status
+        ME = MException('Git:couldntExecuteGitCommand', ...
+        'git command %s resulted in failure!', commandString);
+        throw(ME);  
+    end
+    v = ver;
+    isRoboticsToolboxAvailable = any(strcmp('Robotics System Toolbox', {v.Name}));
+    desiredRate = 5;
+    if (isRoboticsToolboxAvailable)
+        r = robotics.Rate(desiredRate);
+        reset(r);
+    end        
     while(true)
         fid = fopen(filename, 'rt' );
         contents = fscanf(fid, '%s\n');
@@ -35,11 +52,21 @@ function [status, result] = git(varargin)
             delete(filename)
             break;
         end
-        pause(0.2);
+        if (isRoboticsToolboxAvailable)
+            waitfor(r);
+        else
+            pause(1/desiredRate);
+        end
     end
     result = contents;
     
     function name = getRepoName()
-    [~, result] = system('git rev-parse --show-toplevel');
+    commandString = 'git rev-parse --show-toplevel';
+    [status, result] = system(commandString);
+    if status
+        ME = MException('Git:couldntExecuteGitCommand', ...
+        'git command %s resulted in failure!', commandString);
+        throw(ME);  
+    end    
     result = result(1:end-1); % remove newline.
     [~,name,~] = fileparts(result);
