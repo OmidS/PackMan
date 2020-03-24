@@ -1,4 +1,4 @@
-function [status, result] = git(varargin)
+function result = git(varargin)
     %GIT Summary of this function goes here
     %   Detailed explanation goes here
     if (nargin == 0)
@@ -46,7 +46,8 @@ function [status, result] = git(varargin)
     end        
     while(true)
         fid = fopen(filename, 'rt' );
-        contents = fscanf(fid, '%s\n');
+        contents = textscan(fid,'%s','Delimiter','\n');
+        contents = contents{1};
         fclose(fid);
         if ~isempty(contents)
             delete(filename)

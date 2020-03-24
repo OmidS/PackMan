@@ -195,18 +195,14 @@ classdef DepMatRepositoryUpdater < handle
                 return;
             end
             
-            % TODO check this out
-            [failure, ~] = git('remote update');
-            if failure
+            try
+                git('remote update');
+                local_id_head = git('rev-parse @{0}'); % current head commit
+            catch
                 status = DepMatStatus.GitFailure;
                 return;
             end
             
-            [failure, local_id_head] = git('rev-parse @{0}'); % current head commit
-            if failure
-                status = DepMatStatus.GitFailure;
-                return;
-            end
             local_id_head = strrep(local_id_head,newline,''); 
             
             if ~obj.RepoDef.GetLatest
@@ -216,18 +212,11 @@ classdef DepMatRepositoryUpdater < handle
                     status = DepMatStatus.UpToDateButWrongHead;
                 end
             else % Get the latest commit
-                [failure, local_id] = git(['rev-parse ',obj.RepoDef.Branch,'@{0}']); % Latest local commit
-                if failure
-                    status = DepMatStatus.GitFailure;
-                    return;
-                end
-                [failure, remote_id] = git(['rev-parse ',obj.RepoDef.Branch,'@{u}']); % Latest remote commit
-                if failure
-                    status = DepMatStatus.GitFailure;
-                    return;
-                end
-                [failure, base] = git(['merge-base ',obj.RepoDef.Branch,'@{0} ',obj.RepoDef.Branch,'@{u}']);
-                if failure
+                try
+                    local_id = git(['rev-parse ',obj.RepoDef.Branch,'@{0}']); % Latest local commit
+                    remote_id = git(['rev-parse ',obj.RepoDef.Branch,'@{u}']); % Latest remote commit
+                    base = git(['merge-base ',obj.RepoDef.Branch,'@{0} ',obj.RepoDef.Branch,'@{u}']);
+                catch
                     status = DepMatStatus.GitFailure;
                     return;
                 end
@@ -255,17 +244,14 @@ classdef DepMatRepositoryUpdater < handle
         end
         
         function [success, output] = internalUpdateRepo(obj)
-            [failure, output] = git(['checkout ',obj.RepoDef.Branch]); % Checkout the branch
-            if failure
-                % TODO Shouldn't be output rather than status?
-                % status = DepMatStatus.GitFailure;
-                DepMatStatus.GitFailure;
+            try
+                output = git(['checkout ', obj.RepoDef.Branch]); % Checkout the branch
+                output = git('pull');
+            catch
+                success = false;
                 return;
             end
-
-            [pullResult, output] = git('pull');
-            pullResult = ~pullResult;
-            success = ~isempty(pullResult) && ~isequal(pullResult, 0);
+            success = true;
         end
         
         function success = internalCloneRepo(obj)
@@ -273,21 +259,19 @@ classdef DepMatRepositoryUpdater < handle
             % Avoid initialisation if it has already been done, to avoid errors
             fetchFailure = obj.checkForFetchFailure;
             if ~fetchFailure
-                if git('init')
-                    success = false;
-                    return;
-                end
-                
-                if git(['remote add -t ' obj.RepoDef.Branch ' origin ' obj.RepoDef.Url])
+                try
+                    git('init');
+                    git(['remote add -t ' obj.RepoDef.Branch ' origin ' obj.RepoDef.Url]);
+                catch
                     success = false;
                     return;
                 end
             end
             
-            [failure, ~] = git('fetch');
-            if (failure)
+            try
+                git('fetch');
+            catch
                 obj.setFetchFailure;
-                
                 success = false;
                 return;            
             end
@@ -298,7 +282,9 @@ classdef DepMatRepositoryUpdater < handle
                 checkoutCmd = ['checkout ' obj.RepoDef.Branch];
             end
             
-            if git(checkoutCmd)
+            try
+                git(checkoutCmd)
+            catch
                 success = false;
                 return;
             end
@@ -311,29 +297,29 @@ classdef DepMatRepositoryUpdater < handle
         end
         
         function [success, changed, headCommitId] = internalCheckoutCommit(obj)
-            [~, local_id_head] = git('rev-parse @{0}'); % current head commit
-            local_id_head = strrep(local_id_head,newline,''); 
-            [~, local_id_latest] = git(['rev-parse ',obj.RepoDef.Branch,'@{0}']); % Latest local commit
-            local_id_latest = strrep(local_id_latest,newline,''); 
-            
-            headCommitId = local_id_head;
             changed = false;
-            toCheckoutHash = '';
-            if ( obj.RepoDef.GetLatest) && ~strcmp(local_id_head, local_id_latest)
-                toCheckoutHash = local_id_latest;
-            elseif ~( obj.RepoDef.GetLatest ) && ~strcmp(local_id_head, obj.RepoDef.Commit)
-                toCheckoutHash = obj.RepoDef.Commit;
-            end
-            if ~isempty(toCheckoutHash)
-                if git(['checkout ' toCheckoutHash])
-                    success = false;
-                    % changed = true;
-                    return;
+            try
+                local_id_head = git('rev-parse @{0}'); % current head commit
+                local_id_head = strrep(local_id_head,newline,''); 
+                local_id_latest = git(['rev-parse ',obj.RepoDef.Branch,'@{0}']); % Latest local commit
+                local_id_latest = strrep(local_id_latest,newline,''); 
+                headCommitId = local_id_head;
+                toCheckoutHash = '';
+                if ( obj.RepoDef.GetLatest) && ~strcmp(local_id_head, local_id_latest)
+                    toCheckoutHash = local_id_latest;
+                elseif ~( obj.RepoDef.GetLatest ) && ~strcmp(local_id_head, obj.RepoDef.Commit)
+                    toCheckoutHash = obj.RepoDef.Commit;
                 end
-                changed = true;
-                headCommitId = toCheckoutHash;
+                if ~isempty(toCheckoutHash)
+                    git(['checkout ' toCheckoutHash])
+                    changed = true;
+                    headCommitId = toCheckoutHash;
+                end
+                success = true;                
+            catch
+                success = false;
+                return;
             end
-            success = true;
         end
         
         function setFetchFailure(obj)
@@ -359,8 +345,9 @@ classdef DepMatRepositoryUpdater < handle
         
         function [status, commitHash] = internalGetHeadHash
             status = true;
-            [failure, commitHash] = git('rev-parse HEAD');
-            if failure
+            try
+                commitHash = git('rev-parse HEAD');
+            catch
                 status = DepMatStatus.GitFailure;
                 return;
             end
