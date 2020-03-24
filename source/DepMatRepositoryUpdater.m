@@ -247,11 +247,10 @@ classdef DepMatRepositoryUpdater < handle
             try
                 output = git(['checkout ', obj.RepoDef.Branch]); % Checkout the branch
                 output = git('pull');
+                success = true;
             catch
                 success = false;
-                return;
             end
-            success = true;
         end
         
         function success = internalCloneRepo(obj)
