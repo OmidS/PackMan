@@ -197,17 +197,12 @@ classdef DepMatRepositoryUpdater < handle
             
             try
                 git('remote update');
-            catch
-                status = DepMatStatus.GitFailure;
-                return;
-            end
-            
-            try
                 local_id_head = git('rev-parse @{0}'); % current head commit
             catch
                 status = DepMatStatus.GitFailure;
                 return;
             end
+            
             local_id_head = strrep(local_id_head,newline,''); 
             
             if ~obj.RepoDef.GetLatest

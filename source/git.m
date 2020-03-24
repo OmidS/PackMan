@@ -50,7 +50,14 @@ function result = git(varargin)
         contents = contents{1};
         fclose(fid);
         if ~isempty(contents)
-            delete(filename)
+            while(true)
+                try
+                    delete(filename);
+                    break;
+                catch
+                    pause(1/desiredRate);
+                end
+            end
             break;
         end
         if (isRoboticsToolboxAvailable)
