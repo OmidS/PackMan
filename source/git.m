@@ -39,7 +39,8 @@ function result = git(varargin)
     end
     v = ver;
     isRoboticsToolboxAvailable = any(strcmp('Robotics System Toolbox', {v.Name}));
-    desiredRate = 10;
+    desiredRate = 5;
+    isRoboticsToolboxAvailable = false;
     if (isRoboticsToolboxAvailable)
         r = robotics.Rate(desiredRate);
         reset(r);
