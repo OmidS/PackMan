@@ -283,7 +283,7 @@ classdef DepMatRepositoryUpdater < handle
             end
             
             try
-                git(checkoutCmd)
+                git(checkoutCmd);
             catch
                 success = false;
                 return;
