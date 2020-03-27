@@ -114,8 +114,8 @@ before_script:
     # Double-check we are still in the right directory
     - pwd
     # Check what octave packages we have installed
-    - octave -q --eval "ver"
-    - octave -q --eval "2+3"
+    # - octave -q --eval "ver"
+    # - octave -q --eval "2+3"
     # ---------------------------------------------------------------------------
     # Remove any cached results files from previous build, if present
     - rm -f testresults.xml;
@@ -131,7 +131,9 @@ before_script:
       fi;
 ###############################################################################
 script:
-    - octave -v --eval "$ADDPATH_COMMAND $TEST_COMMAND";
+    - cd source/tests;
+    - moxunit_runtests
+    # - octave -v --eval "$ADDPATH_COMMAND $TEST_COMMAND";
 
 ###############################################################################
 after_script:
