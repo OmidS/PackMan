@@ -75,7 +75,8 @@ before_install:
   
 ###############################################################################
 install:
-    - ls
+    # - ls
+    - EXTPATH="source/external"
     # Ensure external packages folder exists and is empty
     # - EXTPATH = "source/external";
     #   echo ${EXTPATH};
