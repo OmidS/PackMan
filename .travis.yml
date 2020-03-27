@@ -134,10 +134,7 @@ before_script:
         echo "OCTAVE_COMMAND| $OCTAVE_COMMAND";
 ###############################################################################
 script:
-    - a=eval "octave -v --eval $OCTAVE_COMMAND";
-      echo $a;
-    - b=eval "octave -v --eval \"sqrt(-1)\"";
-      echo $b;
+    - echo $OCTAVE_COMMAND";
 
 ###############################################################################
 after_script:
