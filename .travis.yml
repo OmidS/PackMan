@@ -74,7 +74,7 @@ before_install:
     - cd ${REPOPATH}
   
   ###############################################################################
-  install:
+#   install:
     # Ensure external packages folder exists and is empty
     # - EXTPATH = "source/external"
     #   rm -rf ${EXTPATH};
