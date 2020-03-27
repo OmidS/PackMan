@@ -133,7 +133,7 @@ before_script:
   
 ###############################################################################
 script:
-    - octave -v --eval "$ADDPATH_COMMAND $TEST_COMMAND";
+    - octave --eval "$ADDPATH_COMMAND $TEST_COMMAND";
 
 ###############################################################################
 after_script:
