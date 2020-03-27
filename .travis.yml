@@ -131,8 +131,8 @@ before_script:
       fi;
   
 ###############################################################################
-#   script:
-#     - octave -q --eval "$ADDPATH_COMMAND $TEST_COMMAND";
+script:
+    - octave -q --eval "$ADDPATH_COMMAND $TEST_COMMAND";
   
 ###############################################################################
 after_script:
