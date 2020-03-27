@@ -115,6 +115,7 @@ before_script:
     - pwd
     # Check what octave packages we have installed
     - octave -q --eval "ver"
+    - octave -q --eval "2+3"
     # ---------------------------------------------------------------------------
     # Remove any cached results files from previous build, if present
     - rm -f testresults.xml;
