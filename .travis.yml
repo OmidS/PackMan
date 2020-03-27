@@ -111,7 +111,7 @@ before_script:
           TEST_ARGS+=", '-cover_xml_file', 'coverage.xml'";
           TEST_ARGS+=", '-cover_json_file', 'coveralls.json'";
       fi;
-      TEST_COMMAND="exit(~moxunit_runtests(${testFolder}, $TEST_ARGS));";
+      TEST_COMMAND="exit(~moxunit_runtests('${testFolder}', $TEST_ARGS));";
       echo "TEST_COMMAND| $TEST_COMMAND";
     # Double-check we are still in the right directory
     - pwd
