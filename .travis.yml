@@ -162,7 +162,7 @@ after_success:
     # coverage report wasn't published.
     # For Codecov, we use this https://github.com/codecov/codecov-bash
     - if [ "$COVERAGE" = "true" ] && [ "$TRAVIS" = "true" ] && [ "$SHIPPABLE" != "true" ]; then
-        curl --verbose -F json_file=@'pwd'/coveralls.json https://coveralls.io/api/v1/jobs  || echo "Coveralls push failed";
+        curl --verbose -F json_file=`pwd`/coveralls.json https://coveralls.io/api/v1/jobs  || echo "Coveralls push failed";
         bash <(curl -s https://codecov.io/bash) || echo "Codecov push failed";
       fi;
   
