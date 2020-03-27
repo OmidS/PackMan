@@ -73,30 +73,30 @@ before_install:
     # Go back to the repository directory
     - cd ${REPOPATH}
   
-#   ###############################################################################
-#   install:
-#     # Ensure external packages folder exists and is empty
-#     - EXTPATH = source/external
-#       rm -rf ${EXTPATH};
-#       mkdir -p ${EXTPATH};
-#     # Install required packages for Octave
-#     - if [ -f requirements-octave.txt ]; then
-#         mopi/mopi.sh requirements-octave.txt ${EXTPATH} "$HOME/external_cache";
-#       fi;
-#     # Install other required packages
-#     - if [ -f requirements.txt ]; then
-#         mopi/mopi.sh requirements.txt ${EXTPATH} "$HOME/external_cache";
-#       fi;
-#     # Install developmental requirements
-#     - if [ -f requirements-dev.txt ]; then
-#         mopi/mopi.sh requirements-dev.txt ${EXTPATH} "$HOME/external_cache";
-#       fi;
-#     # Before running the tests, we will have to add our package and our
-#     # external dependencies to the octave path
-#     - PACKAGE_FOLDER="package_name";
-#       ADDPATH_COMMAND="addpath(genpath(fullfile(pwd, '$PACKAGE_FOLDER')));";
-#       ADDPATH_COMMAND+=" addpath(genpath(fullfile(pwd, '${EXTPATH}')));";
-#       echo "ADDPATH_COMMAND| $ADDPATH_COMMAND";
+  ###############################################################################
+  install:
+    # Ensure external packages folder exists and is empty
+    - EXTPATH = source/external
+      rm -rf ${EXTPATH};
+      mkdir -p ${EXTPATH};
+    # Install required packages for Octave
+    - if [ -f requirements-octave.txt ]; then
+        mopi/mopi.sh requirements-octave.txt ${EXTPATH} "$HOME/external_cache";
+      fi;
+    # Install other required packages
+    - if [ -f requirements.txt ]; then
+        mopi/mopi.sh requirements.txt ${EXTPATH} "$HOME/external_cache";
+      fi;
+    # Install developmental requirements
+    - if [ -f requirements-dev.txt ]; then
+        mopi/mopi.sh requirements-dev.txt ${EXTPATH} "$HOME/external_cache";
+      fi;
+    # Before running the tests, we will have to add our package and our
+    # external dependencies to the octave path
+    - PACKAGE_FOLDER="package_name";
+      ADDPATH_COMMAND="addpath(genpath(fullfile(pwd, '$PACKAGE_FOLDER')));";
+      ADDPATH_COMMAND+=" addpath(genpath(fullfile(pwd, '${EXTPATH}')));";
+      echo "ADDPATH_COMMAND| $ADDPATH_COMMAND";
 
 ###############################################################################
 # before_script:
