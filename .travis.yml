@@ -21,7 +21,7 @@ fast_finish: true
 
 before_install:
 - docker pull mtmiller/octave:${OCTAVE_VERSION}
-- docker run mtmiller/octave:${OCTAVE_VERSION} -it
+- docker run -it mtmiller/octave
 
 - echo '<?xml version="1.0" encoding="UTF-8" standalone="no"?><project basedir="." default="build" name="PackMan"><target name="test"/></project>' > build.xml
 # Remember the directory where our repository to test is located
