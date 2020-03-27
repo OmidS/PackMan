@@ -164,6 +164,6 @@ before_install:
 #         bash <(curl -s https://codecov.io/bash) || echo "Codecov push failed";
 #       fi;
   
-  ###############################################################################
-  # Enable archiving of artifacts on Shippable (does nothing on Travis)
-  archive: true      
+#   ###############################################################################
+#   # Enable archiving of artifacts on Shippable (does nothing on Travis)
+#   archive: true      
