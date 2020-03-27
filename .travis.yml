@@ -132,7 +132,8 @@ before_script:
   
 ###############################################################################
 script:
-    - octave -q --eval "$ADDPATH_COMMAND $TEST_COMMAND";
+    - echo "$ADDPATH_COMMAND $TEST_COMMAND";
+    # - octave -q --eval "$ADDPATH_COMMAND $TEST_COMMAND";
   
 ###############################################################################
 after_script:
