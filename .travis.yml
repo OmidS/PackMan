@@ -1,5 +1,7 @@
 # We pretend to be Java because we need GNU Octave which is not 
 # available (as of January 2016)
+os: linux
+dist: bionic
 language: java
 
 ###############################################################################
@@ -18,8 +20,7 @@ env:
         - COVERAGE="false"
         - COVERAGE="true"    
     jobs:
-        allow_failures:
-            - env: COVERAGE="true"
+        allow_failures: '[{ env: COVERAGE=true }]'
         fast_finish: true
         
 ###############################################################################
