@@ -14,10 +14,10 @@ cache:
 
 ###############################################################################
 env:
-    matrix:
+    jobs:
         - COVERAGE="false"
         - COVERAGE="true"    
-    matrix:
+    jobs:
         allow_failures:
             - env: COVERAGE="true"
         fast_finish: true
