@@ -75,11 +75,9 @@ before_install:
   
 ###############################################################################
 install:
-    # - ls
-    - EXTPATH="source/external"
     # Ensure external packages folder exists and is empty
-    # - EXTPATH = "source/external";
-    #   echo ${EXTPATH};
+    - EXTPATH="source/external";
+      echo ${EXTPATH};
     #   rm -rf ${EXTPATH};
     #   mkdir -p ${EXTPATH};
     # # Install required packages for Octave
