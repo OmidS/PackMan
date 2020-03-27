@@ -15,9 +15,11 @@ cache:
     - $HOME/external_cache
 
 ###############################################################################
-env:   
+env:
     jobs:
         - COVERAGE="false"
+        - COVERAGE="true"    
+    jobs:
         allow_failures: '[{ env: COVERAGE=true }]'
         fast_finish: true
         
