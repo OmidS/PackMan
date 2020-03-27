@@ -5,6 +5,7 @@
 %% Main function to generate tests
 function tests = testPackMan
 tests = functiontests(localfunctions);
+disp tests
 end
 
 %% Test Functions
