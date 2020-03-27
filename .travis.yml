@@ -13,6 +13,12 @@ env:
 - OCTAVE_VERSION=4.2
 - OCTAVE_VERSION=4.4
 - OCTAVE_VERSION=5
+  jobs:
+    - COVERAGE="false"
+    - COVERAGE="true"    
+  jobs:
+    allow_failures: '[{ env: COVERAGE=true }]'
+    fast_finish: true
 
 before_install:
 - docker pull mtmiller/octave:${OCTAVE_VERSION}
