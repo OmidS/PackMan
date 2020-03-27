@@ -73,8 +73,9 @@ before_install:
     # Go back to the repository directory
     - cd ${REPOPATH}
   
-  ###############################################################################
-#   install:
+###############################################################################
+install:
+    - ls
     # Ensure external packages folder exists and is empty
     # - EXTPATH = "source/external";
     #   echo ${EXTPATH};
