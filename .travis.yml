@@ -130,11 +130,10 @@ before_script:
         mkdir -p shippable/testresults;
         mkdir -p shippable/codecoverage;
       fi;
-      - OCTAVE_COMMAND="$ADDPATH_COMMAND $TEST_COMMAND";
-        echo "OCTAVE_COMMAND| $OCTAVE_COMMAND";
 ###############################################################################
 script:
-    - echo $OCTAVE_COMMAND;
+    - octave -v --eval "$ADDPATH_COMMAND $TEST_COMMAND";
+    - octave -v --eval "addpath(genpath(fullfile(pwd, 'source'))); addpath(genpath(fullfile(pwd, 'source/external')); exit(~moxunit_runtests('source/tests', '-recursive', '-verbose', '-junit_xml_file', 'testresults.xml', '-with_coverage', '-cover', 'source', '-cover_exclude', source/tests, '-cover_xml_file', 'coverage.xml', '-cover_json_file', 'coveralls.json'))";
 
 ###############################################################################
 after_script:
