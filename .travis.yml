@@ -1,7 +1,7 @@
 # We pretend to be Java because we need GNU Octave which is not 
 # available (as of January 2016)
 language: java
-install: ant deps
+
 ###############################################################################
 cache:
   # Downloading octave takes a while, so let's cache apt
@@ -22,7 +22,8 @@ cache:
 #             - env: COVERAGE="true"
 #         fast_finish: true
         
-################################################################################ Command to install dependencies
+###############################################################################
+# Command to install dependencies
 before_install:
     # Remember the directory where our repository to test is located
     - REPOPATH="$(pwd)" && pwd
@@ -72,32 +73,32 @@ before_install:
     # Go back to the repository directory
     - cd ${REPOPATH}
   
-#   ###############################################################################
-#   install:
-#     # Ensure external packages folder exists and is empty
-#     - REPOPATH = rm source/external
-#       -rf ${REPOPATH};
-#       mkdir -p source/external;
-#     # Install required packages for Octave
-#     - if [ -f requirements-octave.txt ]; then
-#         mopi/mopi.sh requirements-octave.txt ${REPOPATH} "$HOME/external_cache";
-#       fi;
-#     # Install other required packages
-#     - if [ -f requirements.txt ]; then
-#         mopi/mopi.sh requirements.txt ${REPOPATH} "$HOME/external_cache";
-#       fi;
-#     # Install developmental requirements
-#     - if [ -f requirements-dev.txt ]; then
-#         mopi/mopi.sh requirements-dev.txt ${REPOPATH} "$HOME/external_cache";
-#       fi;
-#     # Before running the tests, we will have to add our package and our
-#     # external dependencies to the octave path
-#     - PACKAGE_FOLDER="package_name";
-#       ADDPATH_COMMAND="addpath(genpath(fullfile(pwd, '$PACKAGE_FOLDER')));";
-#       ADDPATH_COMMAND+=" addpath(genpath(fullfile(pwd, 'external')));";
-#       echo "ADDPATH_COMMAND| $ADDPATH_COMMAND";
+  ###############################################################################
+  install:
+    # Ensure external packages folder exists and is empty
+    - REPOPATH = source/external
+      rm -rf ${REPOPATH};
+      mkdir -p ${REPOPATH};
+    # Install required packages for Octave
+    - if [ -f requirements-octave.txt ]; then
+        mopi/mopi.sh requirements-octave.txt ${REPOPATH} "$HOME/external_cache";
+      fi;
+    # Install other required packages
+    - if [ -f requirements.txt ]; then
+        mopi/mopi.sh requirements.txt ${REPOPATH} "$HOME/external_cache";
+      fi;
+    # Install developmental requirements
+    - if [ -f requirements-dev.txt ]; then
+        mopi/mopi.sh requirements-dev.txt ${REPOPATH} "$HOME/external_cache";
+      fi;
+    # Before running the tests, we will have to add our package and our
+    # external dependencies to the octave path
+    - PACKAGE_FOLDER="package_name";
+      ADDPATH_COMMAND="addpath(genpath(fullfile(pwd, '$PACKAGE_FOLDER')));";
+      ADDPATH_COMMAND+=" addpath(genpath(fullfile(pwd, '${REPOPATH}')));";
+      echo "ADDPATH_COMMAND| $ADDPATH_COMMAND";
 
-# ###############################################################################
+###############################################################################
 # before_script:
 #     - testFolder = source/tests
 #     - TEST_ARGS="'-recursive', '-verbose', '-junit_xml_file', 'testresults.xml'";
