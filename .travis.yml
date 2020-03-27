@@ -25,6 +25,7 @@ env:
 ###############################################################################
 # Command to install dependencies
 before_install:
+    - echo '<?xml version="1.0" encoding="UTF-8" standalone="no"?><project basedir="." default="build" name="PackMan"><target name="test"/></project>' > build.xml
     # Remember the directory where our repository to test is located
     - REPOPATH="$(pwd)" && pwd
     # ---------------------------------------------------------------------------
