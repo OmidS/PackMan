@@ -1,95 +1,105 @@
+os: linux
 dist: xenial
-language: generic
+language: general
 
+###############################################################################
 cache:
   # Downloading octave takes a while, so let's cache apt
   apt: true
+  directories:
+    # Cache octave packages
+    - $HOME/octave
+    # Cache other packages
+    - $HOME/external_cache
 
-services:
-- docker
-
+###############################################################################
 env:
-jobs:
-- COVERAGE="false"
-- COVERAGE="true"    
-jobs:
-allow_failures: '[{ env: COVERAGE=true }]'
-fast_finish: true
-
+    jobs:
+        - COVERAGE="false"
+        - COVERAGE="true"    
+    jobs:
+        allow_failures: '[{ env: COVERAGE=true }]'
+        fast_finish: true
+        
+###############################################################################
+# Command to install dependencies
 before_install:
-- docker pull openmicroscopy/octave
-- docker run --rm -it --entrypoint bash openmicroscopy/octave # Bash shell
-
-- echo '<?xml version="1.0" encoding="UTF-8" standalone="no"?><project basedir="." default="build" name="PackMan"><target name="test"/></project>' > build.xml
-# Remember the directory where our repository to test is located
-- REPOPATH="$(pwd)" && pwd
-# ---------------------------------------------------------------------------
-# Check whether we need to upgrade the gcc and g++ versions. We do need to if
-# the version is less the 4.8 and we need to install the image package from
-# Octave Forge (possibly for other packages as well).
-# For now, lets just always say we do need to do this.
-- UPGRADE_GCC="true"
-# ---------------------------------------------------------------------------
-# Add repository for installing g++-4.8 on Ubuntu 12.04
-- if [ "$UPGRADE_GCC" = "true" ]; then
-    sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test;
-  fi
-# Update apt-get to include the contents from the new locations
-- travis_retry sudo apt-get update -qq
-# Add a C++11 compiler so we can install image package
-- if [ "$UPGRADE_GCC" = "true" ]; then
-    travis_retry sudo apt-get install -y gcc-4.8 g++-4.8;
-    sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 50;
-    sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 50;
-  fi;
-# Check which versions of g++ and gcc we are using
-- which g++;
-    g++ --version;
-    which gcc;
-    gcc --version;
-# ---------------------------------------------------------------------------
-# Go up one level and retrieve MOxUnit from its repository
-- cd ..;
-    ls -alh;
-# Remove directory if it is already there from previous build
-- rm -rf MOxUnit;
-- git clone https://github.com/MOxUnit/MOxUnit.git
-# Install MOxUnit, which adds itself to the startup path
-- make -C MOxUnit install
-# Install MOcov, which adds itself to the startup path
-- if [ "$COVERAGE" = "true" ]; then
-    rm -rf MOcov;
-    git clone https://github.com/MOcov/MOcov.git;
-    make -C MOcov install;
-  fi;
-# Go back to the repository directory
-- cd ${REPOPATH}
-
+    - echo '<?xml version="1.0" encoding="UTF-8" standalone="no"?><project basedir="." default="build" name="PackMan"><target name="test"/></project>' > build.xml
+    # Remember the directory where our repository to test is located
+    - REPOPATH="$(pwd)" && pwd
+    # ---------------------------------------------------------------------------
+    # Check whether we need to upgrade the gcc and g++ versions. We do need to if
+    # the version is less the 4.8 and we need to install the image package from
+    # Octave Forge (possibly for other packages as well).
+    # For now, lets just always say we do need to do this.
+    - UPGRADE_GCC="true"
+    # ---------------------------------------------------------------------------
+    # Add repository for octave
+    - travis_retry sudo add-apt-repository -y ppa:octave/stable
+    # Add repository for installing g++-4.8 on Ubuntu 12.04
+    - if [ "$UPGRADE_GCC" = "true" ]; then
+        sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test;
+      fi
+    # Update apt-get to include the contents from the new locations
+    - travis_retry sudo apt-get update -qq
+    # Install octave with apt-get
+    - travis_retry sudo apt-get install -y octave liboctave-dev
+    # Add a C++11 compiler so we can install image package
+    - if [ "$UPGRADE_GCC" = "true" ]; then
+        travis_retry sudo apt-get install -y gcc-4.8 g++-4.8;
+        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.8 50;
+        sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.8 50;
+      fi;
+    # Check which versions of g++ and gcc we are using
+    - which g++;
+      g++ --version;
+      which gcc;
+      gcc --version;
+    # ---------------------------------------------------------------------------
+    # Go up one level and retrieve MOxUnit from its repository
+    - cd ..;
+      ls -alh;
+    # Remove directory if it is already there from previous build
+    - rm -rf MOxUnit;
+    - git clone https://github.com/MOxUnit/MOxUnit.git
+    # Install MOxUnit, which adds itself to the startup path
+    - make -C MOxUnit install
+    # Install MOcov, which adds itself to the startup path
+    - if [ "$COVERAGE" = "true" ]; then
+          rm -rf MOcov;
+          git clone https://github.com/MOcov/MOcov.git;
+          make -C MOcov install;
+      fi;
+    # Go back to the repository directory
+    - cd ${REPOPATH}
+  
+###############################################################################
 install:
-# Ensure external packages folder exists and is empty
-- EXTPATH="source/external";
-    echo ${EXTPATH};
-    rm -rf ${EXTPATH};
-    mkdir -p ${EXTPATH};
-# Install required packages for Octave
-- if [ -f requirements-octave.txt ]; then
-    mopi/mopi.sh requirements-octave.txt ${EXTPATH} "$HOME/external_cache";
-    fi;
-# Install other required packages
-- if [ -f requirements.txt ]; then
-    mopi/mopi.sh requirements.txt ${EXTPATH} "$HOME/external_cache";
-    fi;
-# Install developmental requirements
-- if [ -f requirements-dev.txt ]; then
-    mopi/mopi.sh requirements-dev.txt ${EXTPATH} "$HOME/external_cache";
-    fi;
-# Before running the tests, we will have to add our package and our
-# external dependencies to the octave path
-- PACKAGE_FOLDER="source";
-    ADDPATH_COMMAND="addpath(genpath(fullfile(pwd, '$PACKAGE_FOLDER')));";
-    ADDPATH_COMMAND+=" addpath(genpath(fullfile(pwd, '${EXTPATH}')));";
-    echo "ADDPATH_COMMAND| $ADDPATH_COMMAND";
+    # Ensure external packages folder exists and is empty
+    - EXTPATH="source/external";
+      echo ${EXTPATH};
+      rm -rf ${EXTPATH};
+      mkdir -p ${EXTPATH};
+    # Install required packages for Octave
+    - if [ -f requirements-octave.txt ]; then
+        mopi/mopi.sh requirements-octave.txt ${EXTPATH} "$HOME/external_cache";
+      fi;
+    # Install other required packages
+    - if [ -f requirements.txt ]; then
+        mopi/mopi.sh requirements.txt ${EXTPATH} "$HOME/external_cache";
+      fi;
+    # Install developmental requirements
+    - if [ -f requirements-dev.txt ]; then
+        mopi/mopi.sh requirements-dev.txt ${EXTPATH} "$HOME/external_cache";
+      fi;
+    # Before running the tests, we will have to add our package and our
+    # external dependencies to the octave path
+    - PACKAGE_FOLDER="source";
+      ADDPATH_COMMAND="addpath(genpath(fullfile(pwd, '$PACKAGE_FOLDER')));";
+      ADDPATH_COMMAND+=" addpath(genpath(fullfile(pwd, '${EXTPATH}')));";
+      echo "ADDPATH_COMMAND| $ADDPATH_COMMAND";
 
+###############################################################################
 before_script:
     - testFolder="source/tests"
     - TEST_ARGS="'-recursive', '-verbose', '-junit_xml_file', 'testresults.xml'";
@@ -104,7 +114,7 @@ before_script:
     # Double-check we are still in the right directory
     - pwd
     # Check what octave packages we have installed
-    - docker run mtmiller/octave octave --eval "ver"
+    - octave -q --eval "ver"
     # ---------------------------------------------------------------------------
     # Remove any cached results files from previous build, if present
     - rm -f testresults.xml;
@@ -118,11 +128,11 @@ before_script:
         mkdir -p shippable/testresults;
         mkdir -p shippable/codecoverage;
       fi;
-
+###############################################################################
 script:
-# - octave -v --eval "$ADDPATH_COMMAND $TEST_COMMAND";
-- docker run mtmiller/octave octave --eval "$ADDPATH_COMMAND $TEST_COMMAND"
+    - octave -v --eval "$ADDPATH_COMMAND $TEST_COMMAND";
 
+###############################################################################
 after_script:
     # Check where we ended up and what's going on where we are
     - pwd
@@ -155,4 +165,4 @@ after_success:
   
 ###############################################################################
 # Enable archiving of artifacts on Shippable (does nothing on Travis)
-archive: true 
+archive: true      
