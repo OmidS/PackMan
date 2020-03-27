@@ -74,9 +74,8 @@ before_install:
     - cd ${REPOPATH}
   
   ###############################################################################
-  install:
+#   install:
     # Ensure external packages folder exists and is empty
-    - EXTPATH="$(pwd)" && pwd
     # - EXTPATH = "source/external";
     #   echo ${EXTPATH};
     #   rm -rf ${EXTPATH};
@@ -165,6 +164,6 @@ before_install:
 #         bash <(curl -s https://codecov.io/bash) || echo "Codecov push failed";
 #       fi;
   
-#   ###############################################################################
-#   # Enable archiving of artifacts on Shippable (does nothing on Travis)
-#   archive: true      
+  ###############################################################################
+  # Enable archiving of artifacts on Shippable (does nothing on Travis)
+  archive: true      
