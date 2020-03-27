@@ -1,7 +1,7 @@
 # We pretend to be Java because we need GNU Octave which is not 
 # available (as of January 2016)
 os: linux
-dist: bionic
+dist: xenial
 language: java
 
 ###############################################################################
