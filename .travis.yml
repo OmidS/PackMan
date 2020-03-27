@@ -134,7 +134,7 @@ before_script:
         echo "OCTAVE_COMMAND| $OCTAVE_COMMAND";
 ###############################################################################
 script:
-    - echo $OCTAVE_COMMAND";
+    - echo $OCTAVE_COMMAND;
 
 ###############################################################################
 after_script:
