@@ -96,7 +96,7 @@ install:
       fi;
     # Before running the tests, we will have to add our package and our
     # external dependencies to the octave path
-    - PACKAGE_FOLDER="package_name";
+    - PACKAGE_FOLDER="source";
       ADDPATH_COMMAND="addpath(genpath(fullfile(pwd, '$PACKAGE_FOLDER')));";
       ADDPATH_COMMAND+=" addpath(genpath(fullfile(pwd, '${EXTPATH}')));";
       echo "ADDPATH_COMMAND| $ADDPATH_COMMAND";
