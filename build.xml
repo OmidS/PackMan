@@ -32,8 +32,7 @@
             <classpath refid="PackMan.classpath"/>
         </javac>
     </target>
-    <target name="test"/>
-    <!-- <target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects"/>
+    <target description="Build all projects which reference this project. Useful to propagate changes." name="build-refprojects"/>
     <target description="copy Eclipse compiler jars to ant lib directory" name="init-eclipse-compiler">
         <copy todir="${ant.library.dir}">
             <fileset dir="${ECLIPSE_HOME}/plugins" includes="org.ecl`lsipse.jdt.core_*.jar"/>
@@ -46,5 +45,6 @@
     <target description="compile project with Eclipse compiler" name="build-eclipse-compiler">
         <property name="build.compiler" value="org.eclipse.jdt.core.JDTCompilerAdapter"/>
         <antcall target="build"/>
-    </target> -->
+    </target>
+    <target name="test"/>
 </project>
