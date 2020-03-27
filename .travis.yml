@@ -101,7 +101,7 @@ install:
 
 ###############################################################################
 before_script:
-    - testFolder = source/tests
+    - testFolder="source/tests"
     - TEST_ARGS="'-recursive', '-verbose', '-junit_xml_file', 'testresults.xml'";
       if [ "$COVERAGE" = "true" ]; then
           TEST_ARGS+=", '-with_coverage', '-cover', '$PACKAGE_FOLDER'";
