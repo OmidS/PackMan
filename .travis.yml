@@ -131,7 +131,7 @@ before_script:
       fi;
 ###############################################################################
 script:
-    - moxunit_runtests
+    - ../MOxUnit/moxunit_runtests
     # - octave -v --eval "$ADDPATH_COMMAND $TEST_COMMAND";
 
 ###############################################################################
