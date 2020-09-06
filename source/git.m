@@ -1,4 +1,4 @@
-function varargout = git(varargin)
+function [result, status] = git(varargin)
     %GIT Summary of this function goes here
     %   Detailed explanation goes here
     if (nargin == 0)
@@ -23,13 +23,7 @@ function varargout = git(varargin)
             ME = MException('Git:couldntExecuteGitCommand', ...
             'git command %s resulted in a failure!', commandString);
             throw(ME);   
-        end
-        switch(nargout)
-            case 0
-                disp(result);
-            otherwise
-                varargout{1} = result;
-        end
+        end        
         return;
     end
     name = getRepoName();
@@ -56,14 +50,7 @@ function varargout = git(varargin)
         contents = contents{1};
         fclose(fid);
         if ~isempty(contents)
-            while(exist(filename, 'file'))
-                try
-                    delete(filename);
-                    break;
-                catch
-                    pause(1/desiredRate);
-                end
-            end
+            delete(filename)
             break;
         end
         if (isRoboticsToolboxAvailable)
@@ -73,12 +60,6 @@ function varargout = git(varargin)
         end
     end
     result = contents;
-    switch(nargout)
-        case 0
-            disp(result);
-        otherwise
-            varargout{1} = result;
-    end    
     
     function name = getRepoName()
     commandString = 'git rev-parse --show-toplevel';
