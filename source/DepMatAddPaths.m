@@ -21,7 +21,7 @@ function DepMatAddPaths(baseFolderList, repoNameList, forceUpdate)
 
     full_path = mfilename('fullpath');
     [path_root, ~, ~] = fileparts(full_path);
-    myPaths = genpath(path_root);
+    myPaths = genNonGitPath(path_root);
     allPathsToAdd = [allPathsToAdd, myPaths];
     
     for repoIndex = 1 : numel(baseFolderList)
@@ -32,7 +32,7 @@ function DepMatAddPaths(baseFolderList, repoNameList, forceUpdate)
             DepMat_PathsHaveBeenSet{end + 1} = repoName;
         end
         if doAddPaths
-            repoPaths = genpath(baseFolderList{repoIndex});
+            repoPaths = genNonGitPath(baseFolderList{repoIndex});
             allPathsToAdd = [allPathsToAdd, repoPaths];
         end
         
