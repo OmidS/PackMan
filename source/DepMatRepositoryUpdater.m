@@ -200,6 +200,21 @@ classdef DepMatRepositoryUpdater < handle
                 return;
             end
             
+            [success, origin] = DepMat.execute('git remote get-url origin');
+            if ~success
+                status = DepMatStatus.GitFailure;
+                return;
+            end
+
+            if ~strcmp(strtrim(origin), obj.RepoDef.Url)
+                % Origin has changed, updating
+                [success, error] = DepMat.execute(['git remote set-url origin ', obj.RepoDef.Url]);
+                if ~success
+                    status = DepMatStatus.GitFailure;
+                    return;
+                end
+            end
+
             [success, local_id] = DepMat.execute('git remote update');
             if ~success
                 status = DepMatStatus.GitFailure;
