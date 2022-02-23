@@ -473,12 +473,18 @@ classdef PackMan < handle & matlab.mixin.Copyable
         function ok = saveAsJSON(dataStruct, savePath, prettify)
             if nargin < 3, prettify = true; end
             try
-                JSON = PackMan.covertToJson(dataStruct, prettify);
                 currentFileContent = '';
+                eolChar = newline;
                 if exist(savePath, 'file')
                     currentFileContent = fileread(savePath);
+                    if contains(currentFileContent, sprintf('\r\n')) % If the previous file has windows line endings
+                        eolChar = sprintf('\r\n');
+                    elseif contains(currentFileContent, sprintf('\n')) % If the previous file has windows line endings
+                        eolChar = sprintf('\n');
+                    end
                 end
                 currentFileContentUnifiedEOL = PackMan.unifyEOLChars(currentFileContent, newline);
+                JSON = PackMan.covertToJson(dataStruct, prettify, eolChar);
                 JSONUnifiedEOL = PackMan.unifyEOLChars(JSON, newline);
                 if ~isequal(JSON, currentFileContent) 
                     % Recreate package.json unless existing file only differs from expected in CRLF vs LF line endings
@@ -500,7 +506,7 @@ classdef PackMan < handle & matlab.mixin.Copyable
             end
         end
         
-        function JSON = covertToJson(dataStruct, prettify)
+        function JSON = covertToJson(dataStruct, prettify, eolChar)
             % Converts data struct to pretty json
             % Inputs:
             % (1) dataStruct: data to be coverted
@@ -510,12 +516,13 @@ classdef PackMan < handle & matlab.mixin.Copyable
             % (1) JSON: JSON string
             
             if nargin < 2, prettify = true; end
+            if nargin < 3, eolChar = newline; end
             JSON = jsonencode( dataStruct );
             if prettify
                 JSON2 = JSON;
-                JSON2 = strrep(JSON2, ',', sprintf(',\n'));
-                JSON2 = strrep(JSON2, '{', sprintf('{\n'));
-                JSON2 = strrep(JSON2, '}', sprintf('\n}'));
+                JSON2 = strrep(JSON2, ',', [',', eolChar]);
+                JSON2 = strrep(JSON2, '{', ['{', eolChar]);
+                JSON2 = strrep(JSON2, '}', [eolChar, '}']);
                 indentCnt = 0;
                 i = 1;
                 while i <= length(JSON2)
@@ -523,11 +530,11 @@ classdef PackMan < handle & matlab.mixin.Copyable
                         indentCnt = indentCnt + 1;
                     elseif strcmp(JSON2(i), '}')
                         indentCnt = indentCnt - 1;
-                        if i > 1 && strcmp(JSON2(i-1), sprintf('\n'))
+                        if i > 1 && strcmp(JSON2(i-1), eolChar)
                             JSON2 = PackMan.replaceStrAtIndex(JSON2, i, [repmat(' ', [1, indentCnt]), '}']);
                         end
                         i = i + indentCnt;
-                    elseif strcmp(JSON2(i), '"') && i > 1 && strcmp(JSON2(i-1), sprintf('\n'))
+                    elseif strcmp(JSON2(i), '"') && i > 1 && strcmp(JSON2(i-1), eolChar)
                         JSON2 = PackMan.replaceStrAtIndex(JSON2, i, [repmat(' ', [1, indentCnt]), '"']);
                         i = i + indentCnt;
                     end
@@ -550,4 +557,3 @@ classdef PackMan < handle & matlab.mixin.Copyable
         end
     end 
 end
-
