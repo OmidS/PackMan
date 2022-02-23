@@ -1,6 +1,6 @@
 classdef PackMan < handle & matlab.mixin.Copyable
     %PackMan Package manager class
-    %   Uses DepMat tp provide dependency management
+    %   Uses DepMat to provide dependency management
     
     properties
         depList          % List of dependencies
@@ -478,13 +478,20 @@ classdef PackMan < handle & matlab.mixin.Copyable
                 if exist(savePath, 'file')
                     currentFileContent = fileread(savePath);
                 end
-                if ~isequal(JSON, currentFileContent)
-                    fId = fopen(savePath, 'w+'); 
-                    if fId > -1
-                        fprintf(fId, '%s', JSON);
-                        fclose(fId);
+                currentFileContentUnifiedEOL = PackMan.unifyEOLChars(currentFileContent, newline);
+                JSONUnifiedEOL = PackMan.unifyEOLChars(JSON, newline);
+                if ~isequal(JSON, currentFileContent) 
+                    % Recreate package.json unless existing file only differs from expected in CRLF vs LF line endings
+                    if ~isequal(JSONUnifiedEOL, currentFileContentUnifiedEOL)
+                        fId = fopen(savePath, 'w+'); 
+                        if fId > -1
+                            fprintf(fId, '%s', JSON);
+                            fclose(fId);
+                        else
+                            ok = false;
+                        end
                     else
-                        ok = false;
+%                         fprintf('"%s" only differs with expected json in EOL chars, no need to update!\n', savePath);
                     end
                 end
                 ok = true;
@@ -534,6 +541,12 @@ classdef PackMan < handle & matlab.mixin.Copyable
             if ind > 1, strO = str(1:(ind-1)); end
             strO = sprintf('%s%s', strO, newStr);
             if ind < length(str), strO = sprintf('%s%s', strO, str((ind+1):end)); end
+        end
+        function text = unifyEOLChars(text, EOL)
+            text = strrep(text, sprintf('\r\n'), EOL);
+            text = strrep(text, sprintf('\n\r'), EOL);
+            text = strrep(text, sprintf('\n'), EOL);
+            text = strrep(text, sprintf('\r'), EOL);
         end
     end 
 end
