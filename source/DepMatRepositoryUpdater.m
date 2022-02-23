@@ -137,6 +137,10 @@ classdef DepMatRepositoryUpdater < handle
                 case DepMatStatus.LocalChanges
                     success = false;
                     obj.dispHandler(['! ' obj.RepoDef.Name ' could not be updated as there are local changes']);
+ 
+                case DepMatStatus.Conflict
+                    success = false;
+                    obj.dispHandler(['! ' obj.RepoDef.Name ' could not be updated due to a conflict']);
                     
                 case DepMatStatus.GitNotFound
                     success = false;
@@ -145,8 +149,9 @@ classdef DepMatRepositoryUpdater < handle
                 case DepMatStatus.GitFailure
                     success = false;
                     obj.dispHandler(['! ' obj.RepoDef.Name ' could not be updated as the git commands returned a failure']);
-                    
+
                 otherwise
+                    success = false;
                     obj.dispHandler(['! ' obj.RepoDef.Name ' could not be updated']);
             end
         end
@@ -362,4 +367,3 @@ classdef DepMatRepositoryUpdater < handle
         
     end
 end
-
