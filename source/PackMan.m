@@ -30,7 +30,21 @@ classdef PackMan < handle & matlab.mixin.Copyable
             if nargin < 4 || isempty(parDir), parDir = pwd; end
             obj.parentDir = parDir;
             
-            if nargin < 1 || isempty(depList), depList = DepMat.empty; end
+            if nargin < 1 || isempty(depList)
+                depList = DepMat.empty; 
+            else                
+                depListLenght = length(depList);
+                f_names = fieldnames(depList);
+                f_namesLength = length(f_names);
+                
+                constructorParams = cell(f_namesLength, depListLenght);
+                depObjList = repmat(DepMatRepo(),1,depListLenght);
+                for i = 1:depListLenght
+                    constructorParams(:, i) = cellfun(@(x)(depList(i).(x)),f_names,'UniformOutput',false);
+                    depObjList(i) = DepMatRepo(constructorParams{:,i});
+                end                
+                depList = depObjList;
+            end
             if nargin < 2 || isempty(depDirPath), depDirPath = fullfile(obj.parentDir, '/external'); end
             if nargin < 3 || isempty(packageFilePath)
                 if exist('jsonencode', 'builtin')
@@ -116,10 +130,12 @@ classdef PackMan < handle & matlab.mixin.Copyable
             if nargin < 2, alreadyInstalled = []; end
             if nargin < 3, depth = 0; end
             
-            for i = 1:length(obj.depList)
-                if i == 1
-                    obj.dispHandler(sprintf('Installing dependencies for %s...', obj.parentDir));
-                end
+            depListLength = length(obj.depList);
+            if depListLength > 0
+                obj.dispHandler(sprintf('Installing dependencies for %s...', obj.parentDir));
+            end
+            
+            for i = 1:depListLength
                 thisDep = obj.depList(i);
                 if ~isempty(alreadyInstalled) && ( ...
                         ismember(thisDep, alreadyInstalled) || ...
@@ -131,7 +147,8 @@ classdef PackMan < handle & matlab.mixin.Copyable
                     for j = 1:length(alreadyInstalled)
                         if (isequal(thisDep.Url, alreadyInstalled(j).Url) || ...
                             isequal(strrep(thisDep.Url, '.git', ''), strrep(alreadyInstalled(j).Url, '.git', ''))) && ...
-                           ~isequal(thisDep.Commit, alreadyInstalled(j).Commit)
+                            isequal(thisDep.Commit, alreadyInstalled(j).Commit) && ...
+                            isequal(thisDep.FolderName, alreadyInstalled(j).FolderName)
                             conflict = true;
                         end
                     end
@@ -201,25 +218,27 @@ classdef PackMan < handle & matlab.mixin.Copyable
             %   pm.install(); 
             %   paths = pm.genPath(); 
             %   addpath(paths); 
-            if nargin < 2, alreadyAdded = []; end
+            if nargin < 2, alreadyAdded = {}; end
             if nargin < 3, selfPaths = true; end
             
-            paths = [];
+            paths = {};
             if selfPaths
                 % Add subpaths of this package
-                paths = [paths, obj.getSelfPaths()];
+                paths = [paths; obj.getSelfPaths()];
             end
             % Add parent paths of deps
             [depSelfPaths, alreadyAdded, nowAdded ] = obj.getDepSelfPaths( alreadyAdded );
-            paths = [paths, depSelfPaths];
+            paths = [paths; depSelfPaths];
             % Recurse to deps of the added deps
             for di = 1:length(nowAdded)
                 thisDep = nowAdded(di);
                 pm = obj.createDepPackMan( thisDep );
                 [depPaths, alreadyAdded] = pm.genPath( alreadyAdded, false );
-                paths = [paths, depPaths];
+                paths = [paths; depPaths];
             end
             
+            paths = unique(paths);
+            paths = paths(~endsWith(paths, '\private')); % Private directories not allowed in MATLAB path.
             if nargout > 1, varargout{1} = alreadyAdded; end
         end
         
@@ -238,10 +257,10 @@ classdef PackMan < handle & matlab.mixin.Copyable
             % Usage sample: 
             %   pm.getDepSelfPaths(); 
 
-            if nargin < 2, alreadyAdded = []; end
+            if nargin < 2, alreadyAdded = {}; end
             
-            nowAdded = [];
-            paths = '';
+            nowAdded = {};
+            paths = {};
             for di = 1:length( obj.depList )
                 thisDep = obj.depList(di);
                 % obj.dispHandler(sprintf('Considering dep %s (%s)', thisDep.Name, thisDep.Commit));
@@ -261,7 +280,7 @@ classdef PackMan < handle & matlab.mixin.Copyable
                         alreadyAdded = cat(1, alreadyAdded, thisDep);
                         nowAdded = cat(1, nowAdded, thisDep);
                         depPaths = pm.getSelfPaths();
-                        paths = [paths, depPaths];
+                        paths = [paths; depPaths];
                     else
                         warning('PackMan:genpath:versionConflict', 'Two different versions of %s were listed as dependencies! Aborted adding of the following version  to the path:  (%s, located in "%s")!\n', thisDep.Url, thisDep.getVersionStr(), pm.parentDir);
                     end
@@ -272,7 +291,7 @@ classdef PackMan < handle & matlab.mixin.Copyable
         end
         
         function paths = getSelfPaths(obj)
-            paths = [];
+            paths = {};
             % Add subpaths of this package
             files = dir(obj.parentDir);
             files(~[files.isdir]) = [];
@@ -280,14 +299,32 @@ classdef PackMan < handle & matlab.mixin.Copyable
             for fi = 1:length(files)
                 subDirPath = fullfile(files(fi).folder, files(fi).name);
                 if strcmp(subDirPath, obj.depDirPath), continue; end
-                paths = [paths, genpath(subDirPath)];
+                paths = [paths; genNonGitPath(subDirPath)];
             end
-            paths = [paths, obj.parentDir, ';'];
+            paths = [{obj.parentDir}; paths];
         end
         
         function pm = createDepPackMan( obj, dep )
             depDir = fullfile(obj.depDirPath, dep.FolderName);
             pm = PackMan([], '', '', depDir);
+            
+            if (~strcmp(dep.Name,'PackMan'))
+                generatedPath = pm.genPath;
+                if (all(cellfun(@exist, generatedPath)== 7))
+                    oldPath = path;
+                    addpath(generatedPath{:});
+                    s = which('installDeps.m', '-ALL');
+                    pathIndexesContainintDepDir = contains(s, depDir);
+                    if any(pathIndexesContainintDepDir)
+                        installDepsPath = s{pathIndexesContainintDepDir};
+                        dpDirPth = fileparts(strrep(installDepsPath,depDir,''));
+                        getDepListFunction = fullfile(depDir, dpDirPth, 'getDepList.m');
+                        run(getDepListFunction);
+                        pm = PackMan(ans, fullfile(fileparts(installDepsPath),'external') , '', depDir);
+                    end
+                    path(oldPath);
+                end
+            end
         end
         
         function saveToFile(obj)
@@ -550,4 +587,3 @@ classdef PackMan < handle & matlab.mixin.Copyable
         end
     end 
 end
-

@@ -4,10 +4,12 @@
 
 function depList = getDepList
 
-depList = [];
+depList        = {'PackMan', 'release', 'https://github.com/DanielAtKrypton/PackMan.git', 'PackMan', '', true};
+depList = cell2struct(depList, {'Name', 'Branch', 'Url', 'FolderName', 'Commit', 'GetLatest'}, 2);    
 % Arguments for DepMatRepo: DepMatRepo(Name, Branch, Url, FolderName, Commit, GetLatest)
-% Example: 
-% depList           = DepMatRepo('PackMan', 'master', 'https://github.com/OmidS/PackMan.git', 'PackMan', '', true);
-% depList(end+1, 1) = DepMatRepo('depmat', 'master', 'https://github.com/OmidS/depmat.git', 'subid', '', true);
-
-end
+% Example:
+% depList        = [...
+%     {'PackMan', 'release', 'https://github.com/DanielAtKrypton/PackMan.git', 'PackMan', '', true};
+%     {'DataHash', 'master', 'https://github.com/DanielAtKrypton/DataHash.git', 'DataHash', '', true};
+% ];
+% depList = cell2struct(depList, {'Name', 'Branch', 'Url', 'FolderName', 'Commit', 'GetLatest'}, 2);

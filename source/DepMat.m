@@ -84,16 +84,19 @@ classdef DepMat
             [return_value, output] = system(command);
             success = return_value == 0;
             if ~success
-                if strfind(output, 'Protocol https not supported or disabled in libcurl')
+                if contains(output, 'Protocol https not supported or disabled in libcurl')
                     obj.dispHandler('! You need to modify the the DYLD_LIBRARY_PATH environment variable to point to a newer version of libcurl. The version installed with Matlab does not support using https with git.');
                 end
             end
         end
 
         function installed = isGitInstalled
-            command = 'git --help';
-            
-            installed = DepMat.execute(command);
+            installed = true;
+            try
+                git('--help');
+            catch
+                installed = false;
+            end
         end
         
         function fixCurlPath
